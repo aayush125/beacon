@@ -5,7 +5,6 @@ import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(MyApp());
-  player.setSourceAsset("sounds/geet.mp3");
 }
 
 class MyApp extends StatelessWidget {
@@ -37,19 +36,19 @@ class MyHomePage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
 
     return Scaffold(
-      body: Column(
-        children: [
-          Text('A very random idea:'),
-          Text(appState.current.asLowerCase),
-
-          ElevatedButton(
-            onPressed: () {
-              playSound();
-              print('music played!');
-            },
-            child: Text('Music'),
-          ),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('A very random idea:'),
+            Text(appState.current.asLowerCase),
+      
+            ElevatedButton(
+              onPressed: toggleSound,
+              child: Text('Music'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -58,6 +57,16 @@ class MyHomePage extends StatelessWidget {
 final player = AudioPlayer();
 
 // Function to play sound
-void playSound() async {
-  await player.resume();
+void toggleSound() async {
+  if (player.state == PlayerState.playing) {
+    print('music paused!');
+    await player.pause();
+  } else if (player.state == PlayerState.paused) {
+    print('music playing!');
+    await player.resume();
+  } else {
+    print('music starting!');
+    await player.setSourceAsset("sounds/geet.mp3");
+    await player.resume();
+  }
 }
