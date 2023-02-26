@@ -1,9 +1,11 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(MyApp());
+  player.setSourceAsset("sounds/geet.mp3");
 }
 
 class MyApp extends StatelessWidget {
@@ -38,9 +40,24 @@ class MyHomePage extends StatelessWidget {
       body: Column(
         children: [
           Text('A very random idea:'),
-          Text(appState.current.asLowerCase)
+          Text(appState.current.asLowerCase),
+
+          ElevatedButton(
+            onPressed: () {
+              playSound();
+              print('music played!');
+            },
+            child: Text('Music'),
+          ),
         ],
       ),
     );
   }
+}
+
+final player = AudioPlayer();
+
+// Function to play sound
+void playSound() async {
+  await player.resume();
 }
