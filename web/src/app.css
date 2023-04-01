@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
+
+:root,
+body.light,
+body.dark {
+  --font: "Nunito";
+}
+
+/* Generated using material-dynamic-colors and beercss */
+:root,
+body.light {
+  --primary:#b91a3a;
+  --on-primary:#ffffff;
+  --primary-container:#ffdadc;
+  --on-primary-container:#41000b;
+  --secondary:#765657;
+  --on-secondary:#ffffff;
+  --secondary-container:#ffdada;
+  --on-secondary-container:#2c1516;
+  --tertiary:#76592f;
+  --on-tertiary:#ffffff;
+  --tertiary-container:#ffddad;
+  --on-tertiary-container:#291800;
+  --error:#ba1b1b;
+  --error-container:#ffdad4;
+  --on-error:#ffffff;
+  --on-error-container:#410001;
+  --background:#fcfcfc;
+  --on-background:#201a1a;
+  --surface:#fcfcfc;
+  --on-surface:#201a1a;
+  --surface-variant:#f4dddd;
+  --on-surface-variant:#524343;
+  --outline:#847373;
+  --inverse-on-surface:#fbeded;
+  --inverse-surface:#362f2f;
+  --inverse-primary:#ffb3b8;
+  --shadow:#000000;
+}
+
+body.dark {
+  --primary:#ffb3b8;
+  --on-primary:#670017;
+  --primary-container:#920025;
+  --on-primary-container:#ffdadc;
+  --secondary:#e6bcbd;
+  --on-secondary:#44292a;
+  --secondary-container:#5c3f40;
+  --on-secondary-container:#ffdada;
+  --tertiary:#e6c08d;
+  --on-tertiary:#432c05;
+  --tertiary-container:#5c421a;
+  --on-tertiary-container:#ffddad;
+  --error:#ffb4a9;
+  --error-container:#930006;
+  --on-error:#680003;
+  --on-error-container:#ffdad4;
+  --background:#201a1a;
+  --on-background:#ecdfdf;
+  --surface:#201a1a;
+  --on-surface:#ecdfdf;
+  --surface-variant:#524343;
+  --on-surface-variant:#d7c1c1;
+  --outline:#9f8c8c;
+  --inverse-on-surface:#201a1a;
+  --inverse-surface:#ecdfdf;
+  --inverse-primary:#b91a3a;
+  --shadow:#000000;
+}
