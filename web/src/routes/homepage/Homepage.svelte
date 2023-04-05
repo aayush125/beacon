@@ -28,7 +28,7 @@
 
 </div>
 
-<button on:click={modeSwitch} class="circle large secondary large-margin absolute bottom right">
+<button on:click={modeSwitch} class="circle large small-elevate secondary large-margin absolute bottom right">
   <i>
     {#if darkMode}
     light_mode

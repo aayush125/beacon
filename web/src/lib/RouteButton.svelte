@@ -4,6 +4,6 @@
   export let route;
 </script>
 
-<button on:click={() => setTimeout(() => push(route), 100)} class="medium-margin">
+<button on:click={() => setTimeout(() => push(route), 100)} class="small-elevate medium-margin">
   <slot />
 </button>
