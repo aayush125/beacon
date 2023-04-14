@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -35,7 +39,45 @@ class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  late Position position;
+  String _currentAddress = "Waiting for location...";
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  _getCurrentLocation() async {
+    position = await _determinePosition();
+    String temp = await _getAddressFromLatLng();
+    setState(() {
+      _currentAddress = temp;
+    });
+  }
+
+  Future<String> _getAddressFromLatLng() async {
+    double lat = position.latitude;
+    double lng = position.longitude;
+
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyBKEI1M_LZSWWEa6AMJCorqfSsVXgD79ns');
+
+    final response = await http.get(url);
+    print(response.body);
+    print(json.decode(response.body)['results'][0]['formatted_address']);
+
+    return await json.decode(response.body)['results'][0]['formatted_address'];
+  }
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
@@ -67,26 +109,28 @@ class MyHomePage extends StatelessWidget {
                     Icons.location_on,
                     color: Color(0xFFE33D55),
                   ),
-                  TextButton(
-                    onPressed: () async {
-                      final Position position = await _determinePosition();
+                  Flexible(
+                    child: TextButton(
+                      onPressed: () async {
+                        //_getCurrentLocation();
 
-                      // for debugging purposes
-                      print("position incoming...");
-                      print(position.latitude);
-                      print(position.longitude);
+                        // for debugging purposes
+                        print("position incoming...");
+                        print(position.latitude);
+                        print(position.longitude);
 
-                      if (context.mounted) {
-                        Navigator.pushNamed(
-                          context,
-                          MapsPage.routeName,
-                          arguments: position,
-                        );
-                      }
-                    },
-                    child: Text(
-                      'Location fetched from somewhere',
-                      style: TextStyle(fontSize: 15),
+                        if (context.mounted) {
+                          Navigator.pushNamed(
+                            context,
+                            MapsPage.routeName,
+                            arguments: position,
+                          );
+                        }
+                      },
+                      child: Text(
+                        _currentAddress,
+                        style: TextStyle(fontSize: 15),
+                      ),
                     ),
                   ),
                 ],
@@ -133,35 +177,35 @@ class _MapsPageState extends State<MapsPage> {
     final args = ModalRoute.of(context)!.settings.arguments as Position;
 
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.green[700],
-      ),
-      home: Scaffold(
-          body: SafeArea(
-        child: GoogleMap(
-          onMapCreated: _onMapCreated,
-          markers: {
-            Marker(
-              markerId: MarkerId('marker_1'),
-              position:
-                  LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
-              draggable: true,
-              onDragEnd: (value) {},
-              infoWindow: InfoWindow(
-                title: 'Marker 1',
-                snippet: 'This is a snippet',
-              ),
-            ),
-          },
-          myLocationEnabled: true,
-          initialCameraPosition: CameraPosition(
-            target: LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
-            zoom: 16.0,
-          ),
+        theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.green[700],
         ),
-      )),
-    );
+        home: Scaffold(
+            body: SafeArea(
+          child: GoogleMap(
+            onMapCreated: _onMapCreated,
+            markers: {
+              Marker(
+                markerId: MarkerId('marker_1'),
+                position:
+                    LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
+                draggable: true,
+                onDragEnd: (value) {},
+                infoWindow: InfoWindow(
+                  title: 'Marker 1',
+                  snippet: 'This is a snippet',
+                ),
+              ),
+            },
+            myLocationEnabled: true,
+            initialCameraPosition: CameraPosition(
+              target:
+                  LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
+              zoom: 16.0,
+            ),
+          ),
+        )));
   }
 }
 
