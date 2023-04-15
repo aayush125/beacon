@@ -1,13 +1,33 @@
-from fastapi import FastAPI
+from math import sin, cos
+from time import time
+from fastapi import FastAPI, WebSocket
+from fastapi.responses import HTMLResponse
+from asyncio import sleep
 
-from routes import web
+from routes import web, app
 
 # Todo: Initialize database connection here
 
-app = FastAPI(root_path="/api")
+api = FastAPI(root_path="/api")
 
-app.include_router(web.router)
+api.include_router(web.router)
+api.include_router(app.router)
 
-@app.get("/")
+@api.get("/")
 def read_root():
   return ["Beacon API.", "Visit /docs for API Documentation."]
+
+@api.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive_json()
+    print(data)
+
+    while True:
+        
+        data["lat"] += sin(time()) * 0.005
+        data["lon"] += cos(time()) * 0.005
+
+        print("sending: ", data)
+        await websocket.send_json(data)
+        await sleep(1);

@@ -20,4 +20,4 @@ build-backend = "pdm.pep517.api"
 [tool]
 [tool.pdm]
 [tool.pdm.scripts]
-dev = "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+dev = "uvicorn main:api --host 0.0.0.0 --port 8000 --reload"

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +7,16 @@ import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+var serverAddress = 'ws://10.0.2.2:5173/api/ws';
+// var serverAddress = 'ws://192.168.1.71:5173/api/ws';
+
+var wsMarker = Marker(
+  markerId: MarkerId('ws_marker'),
+  visible: false
+);
 
 void main() {
   runApp(MyApp());
@@ -48,7 +57,42 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late Position position;
-  String _currentAddress = "Waiting for location...";
+  String _currentAddress = "Loading location...";
+  final dialogFieldController = TextEditingController();
+
+  void openServerDialog() {
+    dialogFieldController.text = serverAddress;
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+          title: Text("[DEBUG] Change Server"),
+          content: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: dialogFieldController,
+                
+              ),
+              ElevatedButton(
+                onPressed: () => serverAddress = dialogFieldController.text,
+                child: Text("Confirm")
+              )
+            ],
+          )
+        );
+      }
+    );
+  }
+
+  @override
+  void dispose() {
+    dialogFieldController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -58,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _getCurrentLocation() async {
     position = await _determinePosition();
-    String temp = await _getAddressFromLatLng();
+    var temp = await _getAddressFromLatLng();
     setState(() {
       _currentAddress = temp;
     });
@@ -77,6 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return await json.decode(response.body)['results'][0]['formatted_address'];
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Flexible(
                     child: TextButton(
                       onPressed: () async {
-                        //_getCurrentLocation();
+                        // _getCurrentLocation();
 
                         // for debugging purposes
                         print("position incoming...");
@@ -145,6 +190,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: toggleSound,
                   child: Text('Music'),
                 ),
+                ElevatedButton(
+                  onPressed: () => openServerDialog(),
+                  child: Text('Change Server Address')
+                ),
               ],
             ),
           ],
@@ -165,23 +214,59 @@ class MapsPage extends StatefulWidget {
 
 class _MapsPageState extends State<MapsPage> {
   late GoogleMapController mapController;
+  late WebSocketChannel channel;
+  late Position pos;
+
 
   //final LatLng _center = const LatLng(27.688415, 85.335490);
 
-  void _onMapCreated(GoogleMapController controller) {
+  void _onMapCreated(GoogleMapController controller) async {
     mapController = controller;
+
+    try {
+      channel = WebSocketChannel.connect(Uri.parse(serverAddress));
+      await channel.ready;
+    } catch (e) {
+      print("ERROR!");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Websocket connection error!')));
+    }
+    
+    channel.stream.listen((msg) {
+      print("RESPONSE:");
+      print(msg);
+
+      final serverPos = jsonDecode(msg);
+
+      setState(() {
+        wsMarker = Marker(
+          markerId: MarkerId('ws_marker'),
+          draggable: false,
+          infoWindow: InfoWindow(
+            title: 'Websocket',
+            snippet: 'Moving marker to illustrate power of websockets!'
+          ),
+          visible: true,
+          position: LatLng(serverPos['lat'], serverPos['lon']),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)
+        );
+      });
+    }, onError: (e) {
+      print("ERROR!");
+    });
+
+    final msg = jsonEncode({
+      'lat': pos.latitude,
+      'lon': pos.longitude
+    });
+    print(msg);
+    channel.sink.add(msg);
   }
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as Position;
+    pos = ModalRoute.of(context)!.settings.arguments as Position;
 
-    return MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: Colors.green[700],
-        ),
-        home: Scaffold(
+    return Scaffold(
             body: SafeArea(
           child: GoogleMap(
             onMapCreated: _onMapCreated,
@@ -189,23 +274,31 @@ class _MapsPageState extends State<MapsPage> {
               Marker(
                 markerId: MarkerId('marker_1'),
                 position:
-                    LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
-                draggable: true,
+                    LatLng(pos.latitude.toDouble(), pos.longitude.toDouble()),
+                draggable: false,
                 onDragEnd: (value) {},
                 infoWindow: InfoWindow(
                   title: 'Marker 1',
                   snippet: 'This is a snippet',
                 ),
               ),
-            },
+              wsMarker
+          },
             myLocationEnabled: true,
             initialCameraPosition: CameraPosition(
               target:
-                  LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
+                  LatLng(pos.latitude.toDouble(), pos.longitude.toDouble()),
               zoom: 16.0,
             ),
           ),
-        )));
+        ));
+  }
+
+  @override
+  void dispose() {
+    channel.sink.close();
+    mapController.dispose();
+    super.dispose();
   }
 }
 

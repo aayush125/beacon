@@ -17,4 +17,3 @@ Planned routes are:
 ## Todos
 
 - Implement Prettier and ESLint support
-- Configure Vite to create proxy for backend server at `/api`
