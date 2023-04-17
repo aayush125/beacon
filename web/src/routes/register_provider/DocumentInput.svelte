@@ -2,10 +2,10 @@
     import placeholder from "@/assets/placeholder.svg";
 
     let preview;
+    export let name;
 
     function previewImage(e) {
         let reader = new FileReader()
-        console.log(e)
         reader.readAsDataURL(e.target.files[0])
         reader.onload = (img) => {
             preview.src = img.target.result
@@ -20,7 +20,7 @@
     <div class="center small-width field label prefix fill primary border">
         <i>add_photo_alternate</i>
         <input type="text">
-        <input type="file" on:change={previewImage}>
+        <input {name} type="file" on:change={previewImage} required>
         <label>Upload</label>
     </div>
 </main>
