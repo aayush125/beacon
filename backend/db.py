@@ -11,7 +11,7 @@ class Provider(SQLModel, table = True):
     locationLat: float
     locationLng: float
     contact_no: str
-    email: str
+    email: str  
     provider_type: str = Literal["fire", "medical", "police"]
 
 engine = create_engine("postgresql://beacon:a@localhost/beacon", echo = True)
