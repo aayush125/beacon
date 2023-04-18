@@ -3,7 +3,7 @@
   import DocumentInput from "./DocumentInput.svelte"
 
   let formData
-  let disabled = true
+  let disabled = false
 
   function formConfirm(e) {
     ui("#confirm-dialog")
