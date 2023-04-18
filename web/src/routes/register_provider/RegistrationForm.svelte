@@ -3,6 +3,7 @@
   import DocumentInput from "./DocumentInput.svelte"
 
   let formData
+  let disabled = true
 
   function formConfirm(e) {
     ui("#confirm-dialog")
@@ -10,10 +11,14 @@
   }
 
   async function submitData() {
+    disabled = true
+
     const res = await fetch("/api/web/provider/register", {
       method: "post",
       body: formData,
     })
+
+    disabled = false
 
     // Close dialog
     ui("#confirm-dialog") 
@@ -50,8 +55,13 @@
     </p>
   </div>
   <nav class="right-align">
-    <button data-ui="#confirm-dialog" class="border">Cancel</button>
-    <button on:click={submitData}>Confirm</button>
+    <button {disabled} data-ui="#confirm-dialog" class="border">Cancel</button>
+    <button {disabled} on:click={submitData}>
+      Confirm
+    </button>
+    {#if disabled}
+      <a class="loader small"></a>
+    {/if}
   </nav>
 </div>
 
