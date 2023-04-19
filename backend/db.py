@@ -14,7 +14,7 @@ class Provider(SQLModel, table = True):
     email: str  
     provider_type: str = Literal["fire", "medical", "police"]
 
-engine = create_engine("postgresql://beacon:a@localhost/beacon", echo = True)
+engine = create_engine("postgresql://postgres:postgres@localhost/beacon", echo = True)
 
 def init_db():
     SQLModel.metadata.create_all(engine)
