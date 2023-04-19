@@ -4,11 +4,13 @@
   import NotFound from "./routes/NotFound.svelte";
   import RegistrationForm from "./routes/register_provider/RegistrationForm.svelte";
   import LoginPage from "./routes/admin/login/loginPage.svelte";
+    import AdminDashboard from "./routes/admin/dashboard/AdminDashboard.svelte";
 
   const routes = {
     "/": Homepage,
     "/register_provider": RegistrationForm,
     "/admin/login": LoginPage,
+    "/admin/dashboard": AdminDashboard,
     "*": NotFound,
   }
 </script>
