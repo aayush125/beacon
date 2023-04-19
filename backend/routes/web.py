@@ -47,3 +47,4 @@ def register_provider(
   upload(img_pan.file, public_id=f"{provider.id}_pan")
   upload(img_reg.file, public_id=f"{provider.id}_reg")
   upload(img_logo.file, public_id=f"{provider.id}_logo")
+
