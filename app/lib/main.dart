@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'registration.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,12 +25,13 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Namer App',
         routes: {
-          MapsPage.routeName: (context) => const MapsPage(),
-        },
-        theme: ThemeData(
+         MapsPage.routeName: (context) => const MapsPage(),
+       },
+       theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
+            textTheme: GoogleFonts.nunitoSansTextTheme(),
+            ),
         home: Auth(),
       ),
     );
