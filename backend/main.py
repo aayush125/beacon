@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import web
+from routes import web, app
 from db import init_db
 import cloudinary
 
@@ -12,10 +12,11 @@ cloudinary.config(
   secure = True
 )
 
-app = FastAPI(root_path="/api")
+api = FastAPI(root_path="/api")
 
-app.include_router(web.router)
+api.include_router(web.router)
+api.include_router(app.router)
 
-@app.get("/")
+@api.get("/")
 def read_root():
   return ["Beacon API.", "Visit /docs for API Documentation."]

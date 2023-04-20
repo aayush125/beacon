@@ -11,6 +11,7 @@ router = APIRouter(
 
 FormStr = Annotated[str, Form()]
 FormInt = Annotated[int, Form()]
+FormFloat = Annotated[float, Form()]
 FormFile = Annotated[UploadFile, File()]
 
 @router.post("/provider/register")
@@ -20,6 +21,8 @@ def register_provider(
   reg_no: FormStr,
   address: FormStr,
   contact_no: FormStr,
+  locationLat: FormFloat,
+  locationLng: FormFloat,
   email: FormStr,
   type: Annotated[Literal["fire", "medical", "police"], Form()],
   img_pan: FormFile,
@@ -35,8 +38,8 @@ def register_provider(
     reg_no=reg_no,
     address=address,
     contact_no=contact_no,
-    locationLat=0,
-    locationLng=0,
+    locationLat=locationLat,
+    locationLng=locationLng,
     email=email,
     provider_type=type
   )

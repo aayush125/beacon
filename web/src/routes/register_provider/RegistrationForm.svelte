@@ -1,6 +1,7 @@
 <script>
   import beaconLogo from "@/assets/beacon_logo_backdrop.svg"
-  import DocumentInput from "./DocumentInput.svelte"
+  import DocumentInput from "@/lib/DocumentInput.svelte"
+  import EmbedMap from "@/lib/EmbedMap.svelte";
 
   let formData
   let disabled = false
@@ -126,12 +127,12 @@
       </div>
     </div>
     <div class="s6">
-      <h5 class="center-align">Documents</h5>
       <div class="input-container">
         <div class="tabs">
           <a data-ui="#pan" class="active">PAN</a>
           <a data-ui="#reg">Registration Certificate</a>
           <a data-ui="#logo">Logo Image</a>
+          <a data-ui="#loc">Location</a>
         </div>
         <div class="page padding left active" id="pan">
           <DocumentInput name="img_pan"/>
@@ -141,6 +142,14 @@
         </div>
         <div class="page padding left" id="logo">
           <DocumentInput name="img_logo"/>
+        </div>
+        <div class="page padding left" id="loc">
+          <p class="center-align">Click on the map to place the marker. Drag the map to move it.</p>
+          <EmbedMap />
+          <label class="center checkbox">
+            <input type="checkbox" required>
+            <span>I have correctly set the location of our office above.</span>
+          </label>
         </div>
       </div>
     </div>

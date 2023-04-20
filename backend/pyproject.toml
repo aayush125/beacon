@@ -13,6 +13,7 @@ dependencies = [
     "sqlmodel>=0.0.8",
     "psycopg2>=2.9.6",
     "cloudinary>=1.32.0",
+    "email-validator>=2.0.0.post1",
 ]
 requires-python = ">=3.9"
 license = {text = "MIT"}
@@ -24,4 +25,5 @@ build-backend = "pdm.pep517.api"
 [tool]
 [tool.pdm]
 [tool.pdm.scripts]
-dev = "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+dev = "uvicorn main:api --host 0.0.0.0 --port 8000 --reload"
+start = "uvicorn main:api --host 0.0.0.0 --port 8000"
