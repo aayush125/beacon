@@ -239,7 +239,7 @@ class Auth extends StatefulWidget {
 
 class _AuthState extends State<Auth> {
   bool showSignUp = true;
-  String reg = "Register";
+  String reg = "Register ";
   String log = "Login";
 
   @override
