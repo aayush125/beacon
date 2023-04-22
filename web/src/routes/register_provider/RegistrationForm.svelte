@@ -56,13 +56,13 @@
     </p>
   </div>
   <nav class="right-align">
+    {#if disabled}
+      <a class="loader small"></a>
+    {/if}
     <button {disabled} data-ui="#confirm-dialog" class="border">Cancel</button>
     <button {disabled} on:click={submitData}>
       Confirm
     </button>
-    {#if disabled}
-      <a class="loader small"></a>
-    {/if}
   </nav>
 </div>
 

@@ -1,52 +1,39 @@
 <script>
+  import { onMount } from "svelte";
+
   let disabled = false
   let actionData = {}
+  let applications = []
+  let loading = true
 
-  async function executeAction() {
-    disabled = true
-
-    const res = await fetch(`/api/web/admin/provider/${actionData.id}?action=${actionData.action}`, {
-      // todo
-      method: 'get', // probably should be POST, also need to include authentication here somehow
-    })
-
-    // todo: reload applications array here
-
-    disabled = false
-
-    // Close dialog
-    ui("#confirm-dialog") 
-
-    // Show toast
-    ui(res.ok ? "#action-success" : "#action-error")
+  async function loadApplications() {
+    applications = []
+    const res = await fetch('/api/web/admin/applications')
+    applications = await res.json()
+    loading = false
   }
 
-  let applications = [
-    {
-      id: 8,
-      name: 'Naya Project',
-      pan_no: 123456789,
-      reg_no: '01-9374',
-      address: '28 kilo',
-      locationLat: 27.629836075366725,
-      locationLng: 85.5250883102417,
-      contact_no: '9809999999',
-      email: 'aayush@gmail.com',
-      provider_type: 'fire',
-    },
-    {
-      id: 9,
-      name: 'Naya',
-      pan_no: 123456789,
-      reg_no: '01-9374',
-      address: '28 kilo',
-      locationLat: 27.629836075366725,
-      locationLng: 85.5250883102417,
-      contact_no: '9809999999',
-      email: 'aayush@gmail.com',
-      provider_type: 'fire',
-    }
-  ]
+  async function executeAction(event) {
+    disabled = true
+
+    const res = await fetch(`/api/web/admin/applications/${actionData.action}/${actionData.id}`, {
+      method: 'post',
+      body: new FormData(event.currentTarget)
+    })
+
+    disabled = false
+    
+    // Close dialog
+    ui("#confirm-dialog") 
+    
+    // Show toast
+    ui(res.ok ? "#action-success" : "#action-error")
+
+    // Reload list
+    loadApplications()
+  }
+
+  onMount(loadApplications)
 </script>
 
 <div class="toast green white-text" id="action-success">
@@ -61,23 +48,45 @@
 
 <div class="modal" id="confirm-dialog">
   <h4>Confirmation</h4>
-  <div class="large-text">
-    <p>
-      <b>Reminder:</b> Make sure that you have checked and verified all details - including location and certificates! 
-    </p>
-    <p>
-      Are you sure you want to <b>{actionData.action}</b> the application for {actionData.name}?
-    </p>
-  </div>
-  <nav class="right-align">
-    <button {disabled} data-ui="#confirm-dialog" class="border">Cancel</button>
-    <button {disabled} on:click={executeAction}>
-      Confirm
-    </button>
-    {#if disabled}
-      <a class="loader small"></a>
-    {/if}
-  </nav>
+  <form on:submit|preventDefault={executeAction}>
+    <div class="large-text">
+      <p>
+        <b>Reminders:</b>
+      </p>
+      <p>
+        1. Make sure that you have checked and verified all details - including location and certificates! 
+      </p>
+      <p>
+        2. You must inform the concerned authority about the outcome, providing additional details if necessary.
+      </p>
+      
+      {#if actionData.action === 'accept'}
+        <div class="center medium-width">
+          <p>Create login credentials for {actionData.name}:</p>
+          <div class="field label border">
+            <input name="username" type="text" required />
+            <label>Login Username</label>
+          </div>
+  
+          <div class="field label border">
+            <input name="password" type="text" required/>
+            <label>Login Password</label>
+          </div>
+        </div>
+      {/if}
+
+      <p>
+        Are you sure you want to <b>{actionData.action}</b> the application for {actionData.name}?
+      </p>
+    </div>
+    <nav class="right-align">
+      {#if disabled}
+        <a class="loader small"></a>
+      {/if}
+      <button type="button" {disabled} data-ui="#confirm-dialog" class="border">Cancel</button>
+      <button {disabled}>Confirm</button>
+    </nav>
+  </form>
 </div>
 
 <main class="responsive center-align">
@@ -186,8 +195,13 @@
         </nav>
       </details>
     </article>
+  {:else}
+    {#if loading}
+      <a class="loader large"></a>
+    {:else}
+      <p class="italic">No provider applications!</p>
+    {/if}
   {/each}
-
 </main>
 
 <style>
