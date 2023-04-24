@@ -52,7 +52,10 @@ def register_provider(
 def login_provider(username: FormStr, password: FormStr):
   session = Session(engine)
   statement = select(Provider).where(Provider.username == username)
-  provider = session.exec(statement).one()
+  provider = session.exec(statement).one_or_none()
+
+  if (provider is None):
+    raise CredentialsException
 
   if not (provider.approved):
     raise CredentialsException
@@ -61,7 +64,7 @@ def login_provider(username: FormStr, password: FormStr):
     raise CredentialsException
   
   res = Response()
-    
+  
   token, hashed_token = gen_token()
   
   res.set_cookie(

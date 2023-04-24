@@ -17,6 +17,19 @@ class Provider(SQLModel, table = True):
   hashed_password: Optional[str] = None
   hashed_token: Optional[str] = None
 
+class User(SQLModel, table = True):
+  id: int = Field(primary_key=True)
+  name: str
+  email: str = Field(unique = True)
+  phone: str = Field(unique = True)
+  address: str
+  dateOfBirth: str
+  docType: str
+  docID: str = Field(unique = True)
+  blood: str
+  hashed_password: str
+  hashed_token: Optional[str] = None
+
 engine = create_engine("postgresql://beacon:t8m%40VwBCA9g*fBTs@beacon-db.postgres.database.azure.com/beacon", echo = True)
 
 def init_db():
