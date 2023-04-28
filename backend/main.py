@@ -20,14 +20,14 @@ def read_root():
 @api.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    data = await websocket.receive_json()
-    print(data)
 
     while True:
-        
-        data["lat"] += sin(time()) * 0.005
-        data["lon"] += cos(time()) * 0.005
+      data = await websocket.receive_json()
+      print(data)
+      
+      # data["lat"] += sin(time()) * 0.005
+      # data["lon"] += cos(time()) * 0.005
 
-        print("sending: ", data)
-        await websocket.send_json(data)
-        await sleep(1);
+      # print("sending: ", data)
+      # await websocket.send_json(data)
+      # await sleep(1);
