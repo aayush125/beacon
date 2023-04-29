@@ -40,6 +40,10 @@ dependencies:
   geocoding: ^2.1.0
   geocoder: ^0.2.1
   http: ^0.13.5
+  flutter_bloc: ^8.1.2
+  authentication: ^0.0.1
+  google_fonts: ^4.0.3
+  shared_preferences: ^2.1.0
 
 
 dev_dependencies:

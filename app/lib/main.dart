@@ -1,43 +1,142 @@
 import 'dart:async';
 
+import 'package:beacon/prefs.dart';
 import 'package:english_words/english_words.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'registration.dart';
+import 'usercubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'user.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'auth.dart';
 
-void main() {
-  runApp(MyApp());
+// void main() {
+//   runApp(MyApp());
+// }
+
+var token = '';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var status = prefs.getBool('isLoggedIn') ?? false;
+  token = prefs.getString('token') ?? '';
+  print("status incoming bro");
+  print(status);
+  print(token);
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp(status: status,));
 }
 
+var serverAddress = '10.0.2.2:5173';
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool status;
+
+  const MyApp({required this.status, Key? key,}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+    User test = User(
+      name: "name",
+      email: "name@email.com",
+      phone: "phone",
+      token: "token",
+      dateOfBirth: "dateOfBirth",
+      blood: "B-",
+      docID: "docID",
+      address: "address",
+      docType: "Passport",
+    );
+
+    test.printAll();
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<UserCubit>(
+          create: (BuildContext context) => UserCubit(test),
+        ),
+      ],
       child: MaterialApp(
         title: 'Namer App',
         routes: {
           MapsPage.routeName: (context) => const MapsPage(),
+          RegisterPage.routeName: (context) => const RegisterPage(),
         },
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          textTheme: GoogleFonts.nunitoSansTextTheme(),
         ),
-        home: Auth(),
+        home: kDebugMode ? AddDialog(status: status) : (status ? MyHomePage() : Auth()),
       ),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+class AddDialog extends StatefulWidget {
+  final bool status;
+  const AddDialog({required this.status, Key? key}) : super(key: key);
+
+  @override
+  State<AddDialog> createState() => _AddDialogState();
+}
+
+class _AddDialogState extends State<AddDialog> {
+  final dialogFieldController = TextEditingController();
+
+  
+
+
+  @override
+  Widget build(BuildContext context) {
+    dialogFieldController.text = serverAddress;
+    print("status from add dialog");
+    print(widget.status);
+    return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10))),
+        title: Text("[DEBUG] Change Server"),
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextField(
+              controller: dialogFieldController,
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  dialogFieldController.text = '10.0.2.2:5173';
+                },
+                child: Text("Server on emulator PC")),
+            ElevatedButton(
+                onPressed: () {
+                  dialogFieldController.text =
+                      'testsite.southeastasia.cloudapp.azure.com:4173';
+                },
+                child: Text("Online Server")),
+            Padding(padding: EdgeInsets.only(bottom: 30)),
+            ElevatedButton(
+                onPressed: () {
+                  serverAddress = dialogFieldController.text;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => (widget.status ? MyHomePage() : Auth())),
+                  );
+                },
+                child: Text("Confirm")),
+          ],
+        ));
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -50,6 +149,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Position position;
   String _currentAddress = "Waiting for location...";
+  AuthAPI authAPI = AuthAPI();
 
   @override
   void initState() {
@@ -60,6 +160,11 @@ class _MyHomePageState extends State<MyHomePage> {
   _getCurrentLocation() async {
     position = await _determinePosition();
     String temp = await _getAddressFromLatLng();
+    print("getcurrent something");
+    print(token);
+    var user = await authAPI.getUserw(token);
+    print("user here");
+    print(user.body);
     setState(() {
       _currentAddress = temp;
     });
@@ -81,7 +186,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
+    AuthAPI authAPI = AuthAPI();
+    //var appState = context.watch<MyAppState>();
 
     return Scaffold(
       /*body: Center(
@@ -141,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('A very random idea:'),
-                Text(appState.current.asLowerCase),
+                //Text(appState.current.asLowerCase),
                 ElevatedButton(
                   onPressed: toggleSound,
                   child: Text('Music'),
