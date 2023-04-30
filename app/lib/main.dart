@@ -294,7 +294,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       )
                     ],
                   ),
-                                    Padding(padding: EdgeInsets.all(20)),
+                  Padding(padding: EdgeInsets.all(20)),
 
                   ElevatedButton(
                       onPressed: () {
@@ -305,12 +305,66 @@ class _MyHomePageState extends State<MyHomePage> {
                 ]),
             Row(
               children: <Widget>[
-                ElevatedButton(onPressed: () {}, child: Text("Fire")),
-                Icon(Icons.fire_hydrant_alt_outlined),
-                ElevatedButton(onPressed: () {}, child: Text("Hospital")),
-                Icon(Icons.local_hospital_outlined),
-                ElevatedButton(onPressed: () {}, child: Text("Police")),
-                Icon(Icons.local_police_outlined),
+                                Padding(padding: EdgeInsets.all(10)),
+
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Icon(Icons.fire_hydrant_alt_outlined,
+                      color: Colors.white),
+                  label: Text(
+                    "Fire",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFFDF465B), 
+                    minimumSize: Size(100, 144), 
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(15), 
+                    ),
+                  ),
+                ),
+                                Padding(padding: EdgeInsets.all(10)),
+
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.local_hospital_outlined,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    "Hospital",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFFDF465B),
+                    minimumSize: Size(100, 144),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(15), 
+                    ),
+                  ), 
+                ),
+                Padding(padding: EdgeInsets.all(10)),
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Icon(Icons.local_police_outlined, color: Colors.white),
+                  label: Text(
+                    "Police",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFFDF465B), 
+                    minimumSize: Size(100, 144), 
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(15), 
+                    ),
+                  ),
+                )
               ],
             )
           ],
