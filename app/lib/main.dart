@@ -13,7 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-var serverAddress = '10.0.2.2:5173/api';
+var serverAddress = 'testsite.southeastasia.cloudapp.azure.com:4173/api';
 // var serverAddress = 'ws://192.168.1.71:5173/api/ws';
 
 var wsMarker = Marker(markerId: MarkerId('ws_marker'), visible: false);
