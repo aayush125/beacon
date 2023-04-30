@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -192,16 +191,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   bool isTimerActive = false;
-
-  int _counter = 15;
+  int _totcounter = 15;
+  int _remcounter = 15;
+  double progressFraction = 0.0;
   Timer? timer;
   void startTimer() {
-    _counter = 15;
+    _remcounter = 15;
     isTimerActive = true;
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
-        if (_counter > 0) {
-          _counter--;
+        if (_remcounter > 0) {
+          _remcounter--;
+          progressFraction = (_totcounter - _remcounter) / _totcounter;
         } else {
           timer.cancel();
         }
@@ -211,11 +212,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _resetCounter() {
     setState(() {
-      _counter = 0;
+      _remcounter = 0;
+      progressFraction = 100;
     });
   }
 
-  int get counter => _counter;
+  int get counter => _remcounter;
   @override
   Widget build(BuildContext context) {
     AuthAPI authAPI = AuthAPI();
@@ -264,16 +266,36 @@ class _MyHomePageState extends State<MyHomePage> {
             Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  (_counter > 0)
+                  (_remcounter > 0)
                       ? Text("")
                       : Text("EMERGENCY SENT",
                           style: TextStyle(
                               color: Color(0xFFE33D55),
                               fontStyle: FontStyle.italic)),
-                  Text(
-                    '$_counter' 's',
-                    style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
+                  Padding(padding: EdgeInsets.all(10)),
+                  Stack(
+                    alignment: Alignment(0, 0),
+                    children: [
+                      Center(
+                        child: SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: CircularProgressIndicator(
+                            value: progressFraction,
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Text(
+                          '$_remcounter' 's',
+                          style: TextStyle(
+                              fontSize: 60, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
                   ),
+                                    Padding(padding: EdgeInsets.all(20)),
+
                   ElevatedButton(
                       onPressed: () {
                         _resetCounter();
@@ -350,23 +372,6 @@ class _MapsPageState extends State<MapsPage> {
             ),
           ),
         )));
-  }
-}
-
-final player = AudioPlayer();
-
-// Function to play sound
-void toggleSound() async {
-  if (player.state == PlayerState.playing) {
-    print('music paused!');
-    await player.pause();
-  } else if (player.state == PlayerState.paused) {
-    print('music playing!');
-    await player.resume();
-  } else {
-    print('music starting!');
-    await player.setSourceAsset("sounds/geet.mp3");
-    await player.resume();
   }
 }
 
