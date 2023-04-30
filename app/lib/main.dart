@@ -1,10 +1,10 @@
 import 'dart:async';
+// import 'dart:developer';
 
-import 'package:beacon/prefs.dart';
-import 'package:english_words/english_words.dart';
+// import 'package:beacon/prefs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -33,7 +33,9 @@ Future<void> main() async {
   print(status);
   print(token);
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp(status: status,));
+  runApp(MyApp(
+    status: status,
+  ));
 }
 
 var serverAddress = '10.0.2.2:5173';
@@ -41,7 +43,10 @@ var serverAddress = '10.0.2.2:5173';
 class MyApp extends StatelessWidget {
   final bool status;
 
-  const MyApp({required this.status, Key? key,}) : super(key: key);
+  const MyApp({
+    this.status = false,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +81,9 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
           textTheme: GoogleFonts.nunitoSansTextTheme(),
         ),
-        home: kDebugMode ? AddDialog(status: status) : (status ? MyHomePage() : Auth()),
+        home: kDebugMode
+            ? AddDialog(status: status)
+            : (status ? MyHomePage() : Auth()),
       ),
     );
   }
@@ -92,9 +99,6 @@ class AddDialog extends StatefulWidget {
 
 class _AddDialogState extends State<AddDialog> {
   final dialogFieldController = TextEditingController();
-
-  
-
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +134,9 @@ class _AddDialogState extends State<AddDialog> {
                   serverAddress = dialogFieldController.text;
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => (widget.status ? MyHomePage() : Auth())),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            (widget.status ? MyHomePage() : Auth())),
                   );
                 },
                 child: Text("Confirm")),
@@ -155,6 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _getCurrentLocation();
+    startTimer();
   }
 
   _getCurrentLocation() async {
@@ -184,26 +191,37 @@ class _MyHomePageState extends State<MyHomePage> {
     return await json.decode(response.body)['results'][0]['formatted_address'];
   }
 
+  bool isTimerActive = false;
+
+  int _counter = 15;
+  Timer? timer;
+  void startTimer() {
+    _counter = 15;
+    isTimerActive = true;
+    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_counter > 0) {
+          _counter--;
+        } else {
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  void _resetCounter() {
+    setState(() {
+      _counter = 0;
+    });
+  }
+
+  int get counter => _counter;
   @override
   Widget build(BuildContext context) {
     AuthAPI authAPI = AuthAPI();
     //var appState = context.watch<MyAppState>();
 
     return Scaffold(
-      /*body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('A very random idea:'),
-            Text(appState.current.asLowerCase),
-      
-            ElevatedButton( 
-              onPressed: toggleSound,
-              child: Text('Music'), 
-            ),
-          ],
-        ),
-      ),*/
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -244,16 +262,35 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('A very random idea:'),
-                //Text(appState.current.asLowerCase),
-                ElevatedButton(
-                  onPressed: toggleSound,
-                  child: Text('Music'),
-                ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  (_counter > 0)
+                      ? Text("")
+                      : Text("EMERGENCY SENT",
+                          style: TextStyle(
+                              color: Color(0xFFE33D55),
+                              fontStyle: FontStyle.italic)),
+                  Text(
+                    '$_counter' 's',
+                    style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        _resetCounter();
+                      },
+                      child: Text('Skip'))
+                  //Text(appState.current.asLowerCase),
+                ]),
+            Row(
+              children: <Widget>[
+                ElevatedButton(onPressed: () {}, child: Text("Fire")),
+                Icon(Icons.fire_hydrant_alt_outlined),
+                ElevatedButton(onPressed: () {}, child: Text("Hospital")),
+                Icon(Icons.local_hospital_outlined),
+                ElevatedButton(onPressed: () {}, child: Text("Police")),
+                Icon(Icons.local_police_outlined),
               ],
-            ),
+            )
           ],
         ),
       ),
