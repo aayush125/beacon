@@ -23,8 +23,10 @@ import 'auth.dart';
 // }
 
 var token = '';
+User theUser = User();
 
 Future<void> main() async {
+  AuthAPI authAPI = AuthAPI();
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var status = prefs.getBool('isLoggedIn') ?? false;
@@ -33,7 +35,9 @@ Future<void> main() async {
   print(status);
   print(token);
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp(status: status,));
+  runApp(MyApp(
+    status: status,
+  ));
 }
 
 var serverAddress = '10.0.2.2:5173';
@@ -41,7 +45,10 @@ var serverAddress = '10.0.2.2:5173';
 class MyApp extends StatelessWidget {
   final bool status;
 
-  const MyApp({required this.status, Key? key,}) : super(key: key);
+  const MyApp({
+    this.status = false,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -70,13 +77,16 @@ class MyApp extends StatelessWidget {
         routes: {
           MapsPage.routeName: (context) => const MapsPage(),
           RegisterPage.routeName: (context) => const RegisterPage(),
+          Auth.routeName: (context) => Auth(),
         },
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
           textTheme: GoogleFonts.nunitoSansTextTheme(),
         ),
-        home: kDebugMode ? AddDialog(status: status) : (status ? MyHomePage() : Auth()),
+        home: kDebugMode
+            ? AddDialog(status: status)
+            : (status ? MyHomePage() : Auth()),
       ),
     );
   }
@@ -92,9 +102,6 @@ class AddDialog extends StatefulWidget {
 
 class _AddDialogState extends State<AddDialog> {
   final dialogFieldController = TextEditingController();
-
-  
-
 
   @override
   Widget build(BuildContext context) {
@@ -126,12 +133,26 @@ class _AddDialogState extends State<AddDialog> {
                 child: Text("Online Server")),
             Padding(padding: EdgeInsets.only(bottom: 30)),
             ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   serverAddress = dialogFieldController.text;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => (widget.status ? MyHomePage() : Auth())),
-                  );
+                  if (token != '') {
+                    AuthAPI authAPI = AuthAPI();
+                    print('token here');
+                    print(token);
+                    var user = await authAPI.getUserw(token);
+                    print("user here");
+                    print(user.body);
+                    theUser = User.fromReqBody(user.body);
+                    print(theUser);
+                  }
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              (widget.status ? MyHomePage() : Auth())),
+                    );
+                  }
                 },
                 child: Text("Confirm")),
           ],
@@ -249,8 +270,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text('A very random idea:'),
                 //Text(appState.current.asLowerCase),
                 ElevatedButton(
-                  onPressed: toggleSound,
-                  child: Text('Music'),
+                  onPressed: () async {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.clear();
+                    if (context.mounted)
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, Auth.routeName, (route) => false);
+                  },
+                  child: Text('Logout'),
                 ),
               ],
             ),

@@ -36,8 +36,20 @@ class AuthAPI extends BaseAPI {
   // implement a method getUser
   Future<http.Response> getUserw(String token) async {
     var body = jsonEncode({'token': token});
+    print(body);
 
     http.Response response = await http.post(Uri.parse(super.getUserPath),
+        headers: super.headers, body: body);
+    
+    print(response);
+
+    return response;
+  }
+
+  Future<http.Response> emergencyPing(String token, bool police, bool fire, bool medical) async {
+    var body = jsonEncode({'token': token, 'police': police, 'fire': fire, 'medical': medical});
+
+    http.Response response = await http.post(Uri.parse(super.emergencyPingPath),
         headers: super.headers, body: body);
 
     return response;

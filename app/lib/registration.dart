@@ -246,15 +246,15 @@ class _RegisterPageState extends State<RegisterPage> {
                   var user = User.fromReqBody(req.body);
                   print("after registration");
                   print(user.token!);
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
                   prefs.setBool("isLoggedIn", true);
                   prefs.setString('token', user.token!);
                   token = user.token!;
                   if (context.mounted) {
                     Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => MyHomePage()));
+                        MaterialPageRoute(builder: (context) => MyHomePage()));
                   }
-                  
                 }
               } else {
                 print("context not mounted!!");
@@ -282,6 +282,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool? _passVisible = false;
+  bool? _errormessage = false;
   final phoneController = TextEditingController();
   final passController = TextEditingController();
   AuthAPI _authAPI = AuthAPI();
@@ -343,6 +344,17 @@ class _LoginPageState extends State<LoginPage> {
           Padding(
             padding: EdgeInsets.only(bottom: 20.0),
           ),
+          Visibility(
+            visible: _errormessage!,
+            child: Text("An error occurred. Please make sure your credentials are correct.",
+                style: TextStyle(fontSize: 15, color: Colors.deepOrange)),
+          ),
+          Visibility(
+            visible: _errormessage!,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 20.0),
+            ),
+          ),
           ElevatedButton(
             onPressed: () async {
               var req = await _authAPI.login(
@@ -353,15 +365,19 @@ class _LoginPageState extends State<LoginPage> {
                   var user = User.fromReqBody(req.body);
                   print("after login");
                   print(user.token!);
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
                   prefs.setBool("isLoggedIn", true);
                   prefs.setString('token', user.token!);
                   token = user.token!;
                   if (context.mounted) {
                     Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => MyHomePage()));
+                        MaterialPageRoute(builder: (context) => MyHomePage()));
                   }
-                  
+                } else {
+                  setState(() {
+                    _errormessage = true;
+                  });
                 }
               } else {
                 print("context not mounted!!");
@@ -379,6 +395,8 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class Auth extends StatefulWidget {
+  static const routeName = '/auth';
+
   @override
   _AuthState createState() => _AuthState();
 }
@@ -387,8 +405,6 @@ class _AuthState extends State<Auth> {
   bool showSignUp = true;
   String reg = "Register ";
   String log = "Login";
-
-  
 
   @override
   Widget build(BuildContext context) {

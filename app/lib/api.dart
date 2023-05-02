@@ -18,6 +18,7 @@ class BaseAPI {
     loginPath = api + "/login";
     logoutPath = api + "/logout";
     getUserPath = api + "/getUser";
+    emergencyPingPath = api + "/emergencyPing";
   }
 
   String base = "";
@@ -26,6 +27,7 @@ class BaseAPI {
   String loginPath = "";
   String logoutPath = "";
   String getUserPath = "";
+  String emergencyPingPath = "";
   Map<String, String> headers = {
     "Content-Type": "application/json; charset=UTF-8"
   };
