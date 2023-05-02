@@ -264,111 +264,152 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  (_remcounter > 0)
-                      ? Text("")
-                      : Text("EMERGENCY SENT",
-                          style: TextStyle(
-                              color: Color(0xFFE33D55),
-                              fontStyle: FontStyle.italic)),
-                  Padding(padding: EdgeInsets.all(10)),
-                  Stack(
-                    alignment: Alignment(0, 0),
-                    children: [
-                      Center(
-                        child: SizedBox(
-                          width: 200,
-                          height: 200,
-                          child: CircularProgressIndicator(
-                            value: progressFraction,
-                          ),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                (_remcounter > 0)
+                    ? Text("")
+                    : Text("EMERGENCY SENT",
+                        style: TextStyle(
+                            color: Color(0xFFE33D55),
+                            fontStyle: FontStyle.italic)),
+                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+                Stack(
+                  alignment: Alignment(0, 0),
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        width: 200,
+                        height: 200,
+                        child: CircularProgressIndicator(
+                          value: progressFraction,
                         ),
                       ),
-                      Center(
-                        child: Text(
-                          '$_remcounter' 's',
-                          style: TextStyle(
-                              fontSize: 60, fontWeight: FontWeight.bold),
-                        ),
-                      )
+                    ),
+                    Center(
+                      child: Text(
+                        '$_remcounter' 's',
+                        style: TextStyle(
+                            fontSize: 60, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  ],
+                ),
+                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+
+                ElevatedButton(
+                    onPressed: () {
+                      _resetCounter();
+                    },
+                    child: Text('Skip')),
+                //Text(appState.current.asLowerCase),
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_fire_department_outlined,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                      Text(
+                        "FIRE",
+                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
+                      ),
                     ],
                   ),
-                  Padding(padding: EdgeInsets.all(20)),
-
-                  ElevatedButton(
-                      onPressed: () {
-                        _resetCounter();
-                      },
-                      child: Text('Skip'))
-                  //Text(appState.current.asLowerCase),
-                ]),
-            Row(
-              children: <Widget>[
-                                Padding(padding: EdgeInsets.all(10)),
-
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.fire_hydrant_alt_outlined,
-                      color: Colors.white),
-                  label: Text(
-                    "Fire",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B), 
-                    minimumSize: Size(100, 144), 
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(15), 
-                    ),
-                  ),
-                ),
-                                Padding(padding: EdgeInsets.all(10)),
-
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.local_hospital_outlined,
-                    color: Colors.white,
-                  ),
-                  label: Text(
-                    "Hospital",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  label: SizedBox.shrink(),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: Color(0xFFDF465B),
-                    minimumSize: Size(100, 144),
+                    fixedSize: Size(105, 144),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(15), 
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                  ), 
+                    elevation: 10,
+                    shadowColor: Colors.black,
+                  ),
+                  
                 ),
-                Padding(padding: EdgeInsets.all(10)),
                 ElevatedButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.local_police_outlined, color: Colors.white),
-                  label: Text(
-                    "Police",
-                    style: TextStyle(color: Colors.white),
+                  icon: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_hospital_outlined,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                      Text(
+                        "HOSPITAL",textAlign: TextAlign.center,
+                        style: TextStyle( fontSize: 14,color: Colors.white),
+                      ),
+                    ],
                   ),
+                  label: SizedBox.shrink(),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B), 
-                    minimumSize: Size(100, 144), 
+                    backgroundColor: Color(0xFFDF465B),
+                    fixedSize: Size(105, 144),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(15), 
+                      borderRadius: BorderRadius.circular(15),
                     ),
+                    elevation: 10,
+                    shadowColor: Colors.black,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_police_outlined,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      Text(
+                        "POLICE",
+                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  label: SizedBox.shrink(),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFFDF465B),
+                    fixedSize: Size(105, 144),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 10,
+                    shadowColor: Colors.black,
                   ),
                 )
+                ,
               ],
-            )
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            SizedBox()   ,         ElevatedButton(
+                    onPressed: () {
+                     
+                    },
+                    child: Text('Submit')) //can be made to disappear when skip is pressed?
+                    
+          
           ],
+          
         ),
+        
       ),
     );
   }
