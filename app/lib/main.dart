@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'auth.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 // void main() {
 //   runApp(MyApp());
@@ -224,192 +225,258 @@ class _MyHomePageState extends State<MyHomePage> {
     //var appState = context.watch<MyAppState>();
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: Color(0xFFE33D55),
-                  ),
-                  Flexible(
-                    child: TextButton(
-                      onPressed: () async {
-                        //_getCurrentLocation();
+      //SlidingUpPanel(panel: Center(child: Text("This is the sliding Widget"),),),
 
-                        // for debugging purposes
-                        print("position incoming...");
-                        print(position.latitude);
-                        print(position.longitude);
+      body: Stack(children: [
+        SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      color: Color(0xFFE33D55),
+                    ),
+                    Flexible(
+                      child: TextButton(
+                        onPressed: () async {
+                          //_getCurrentLocation();
 
-                        if (context.mounted) {
-                          Navigator.pushNamed(
-                            context,
-                            MapsPage.routeName,
-                            arguments: position,
-                          );
-                        }
-                      },
-                      child: Text(
-                        _currentAddress,
-                        style: TextStyle(fontSize: 15),
+                          // for debugging purposes
+                          print("position incoming...");
+                          print(position.latitude);
+                          print(position.longitude);
+
+                          if (context.mounted) {
+                            Navigator.pushNamed(
+                              context,
+                              MapsPage.routeName,
+                              arguments: position,
+                            );
+                          }
+                        },
+                        child: Text(
+                          _currentAddress,
+                          style: TextStyle(fontSize: 15),
+                        ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  (_remcounter > 0)
+                      ? Text("")
+                      : Text("EMERGENCY SENT",
+                          style: TextStyle(
+                              color: Color(0xFFE33D55),
+                              fontStyle: FontStyle.italic)),
+                  Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+                  Stack(
+                    alignment: Alignment(0, 0),
+                    children: [
+                      Center(
+                        child: SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: CircularProgressIndicator(
+                            value: progressFraction,
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Text(
+                          '$_remcounter' 's',
+                          style: TextStyle(
+                              fontSize: 60, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ),
+                  Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+
+                  ElevatedButton(
+                      onPressed: () {
+                        _resetCounter();
+                      },
+                      child: Text('Skip')),
+                  //Text(appState.current.asLowerCase),
+                ],
+              ),
+              Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.local_fire_department_outlined,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                        Text(
+                          "FIRE",
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w100,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    label: SizedBox.shrink(),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFFDF465B),
+                      fixedSize: Size(105, 144),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 10,
+                      shadowColor: Colors.black,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.local_hospital_outlined,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                        Text(
+                          "HOSPITAL",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    label: SizedBox.shrink(),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFFDF465B),
+                      fixedSize: Size(105, 144),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 10,
+                      shadowColor: Colors.black,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.local_police_outlined,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                        Padding(padding: EdgeInsets.only(bottom: 10)),
+                        Text(
+                          "POLICE",
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w100,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    label: SizedBox.shrink(),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFFDF465B),
+                      fixedSize: Size(105, 144),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 10,
+                      shadowColor: Colors.black,
                     ),
                   ),
                 ],
               ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                (_remcounter > 0)
-                    ? Text("")
-                    : Text("EMERGENCY SENT",
-                        style: TextStyle(
-                            color: Color(0xFFE33D55),
-                            fontStyle: FontStyle.italic)),
-                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
-                Stack(
-                  alignment: Alignment(0, 0),
-                  children: [
-                    Center(
-                      child: SizedBox(
-                        width: 200,
-                        height: 200,
-                        child: CircularProgressIndicator(
-                          value: progressFraction,
+              Padding(padding: EdgeInsets.all(8)),
+              SizedBox(),
+              ElevatedButton(
+                  onPressed: () {},
+                  child: Text(
+                      'Submit')), //can be made to disappear when skip is pressed?
+            ],
+          ),
+        ),
+        SlidingUpPanel(
+          
+          minHeight: 100,
+          maxHeight: 300,
+          panel: Center(
+            child: Text('USER INFO'),
+          ),
+          collapsed: 
+          Container(
+
+            decoration: BoxDecoration(
+                color: Color(0xffeaeaeb),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25))),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: const Text(
+                          'Kristen Stewart',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    Center(
-                      child: Text(
-                        '$_remcounter' 's',
+                      Text(
+                        '9860144044',
                         style: TextStyle(
-                            fontSize: 60, fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
-                ),
-                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
-
-                ElevatedButton(
-                    onPressed: () {
-                      _resetCounter();
-                    },
-                    child: Text('Skip')),
-                //Text(appState.current.asLowerCase),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(8.0)), // Add some padding
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.local_fire_department_outlined,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                      Text(
-                        "FIRE",
-                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
+                          color: Colors.grey[500],
+                        ),
                       ),
                     ],
                   ),
-                  label: SizedBox.shrink(),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B),
-                    fixedSize: Size(105, 144),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 10,
-                    shadowColor: Colors.black,
-                  ),
-                  
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.local_hospital_outlined,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                      Text(
-                        "HOSPITAL",textAlign: TextAlign.center,
-                        style: TextStyle( fontSize: 14,color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  label: SizedBox.shrink(),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B),
-                    fixedSize: Size(105, 144),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 10,
-                    shadowColor: Colors.black,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.local_police_outlined,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      Text(
-                        "POLICE",
-                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  label: SizedBox.shrink(),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B),
-                    fixedSize: Size(105, 144),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 10,
-                    shadowColor: Colors.black,
-                  ),
+                CircleAvatar(
+                  radius: 50,
+  backgroundImage: AssetImage('assets/sounds/IMG_0751.JPG'),
                 )
-                ,
               ],
             ),
-            Padding(padding: EdgeInsets.all(8)),
-            SizedBox()   ,         ElevatedButton(
-                    onPressed: () {
-                     
-                    },
-                    child: Text('Submit')) //can be made to disappear when skip is pressed?
-                    
-          
-          ],
-          
+          ),
         ),
         
+      ]),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      floatingActionButton: FloatingActionButton.extended(
+        
+        
+        onPressed: () {
+          // Add your onPressed code here!
+        },
+        label: const Text('LogOut',style: TextStyle(color: Colors.white),),
+        icon: const Icon(Icons.logout_outlined,color: Colors.white,),
+        backgroundColor: Color(0xFF363F6E),
       ),
     );
   }
@@ -443,30 +510,31 @@ class _MapsPageState extends State<MapsPage> {
           colorSchemeSeed: Colors.green[700],
         ),
         home: Scaffold(
-            body: SafeArea(
-          child: GoogleMap(
-            onMapCreated: _onMapCreated,
-            markers: {
-              Marker(
-                markerId: MarkerId('marker_1'),
-                position:
-                    LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
-                draggable: true,
-                onDragEnd: (value) {},
-                infoWindow: InfoWindow(
-                  title: 'Marker 1',
-                  snippet: 'This is a snippet',
+          body: SafeArea(
+            child: GoogleMap(
+              onMapCreated: _onMapCreated,
+              markers: {
+                Marker(
+                  markerId: MarkerId('marker_1'),
+                  position: LatLng(
+                      args.latitude.toDouble(), args.longitude.toDouble()),
+                  draggable: true,
+                  onDragEnd: (value) {},
+                  infoWindow: InfoWindow(
+                    title: 'Marker 1',
+                    snippet: 'This is a snippet',
+                  ),
                 ),
+              },
+              myLocationEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target:
+                    LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
+                zoom: 16.0,
               ),
-            },
-            myLocationEnabled: true,
-            initialCameraPosition: CameraPosition(
-              target:
-                  LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
-              zoom: 16.0,
             ),
           ),
-        )));
+        ));
   }
 }
 
