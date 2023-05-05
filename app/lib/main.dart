@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'auth.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 // void main() {
@@ -259,77 +260,81 @@ class _MyHomePageState extends State<MyHomePage> {
     //var appState = context.watch<MyAppState>();
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    color: Color(0xFFE33D55),
-                  ),
-                  Flexible(
-                    child: TextButton(
-                      onPressed: () async {
-                        //_getCurrentLocation();
+      //SlidingUpPanel(panel: Center(child: Text("This is the sliding Widget"),),),
 
-                        // for debugging purposes
-                        print("position incoming...");
-                        print(position.latitude);
-                        print(position.longitude);
-
-                        if (context.mounted) {
-                          Navigator.pushNamed(
-                            context,
-                            MapsPage.routeName,
-                            arguments: position,
-                          );
-                        }
-                      },
-                      child: Text(
-                        _currentAddress,
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                (_remcounter > 0)
-                    ? Text("")
-                    : Text("EMERGENCY SENT",
-                        style: TextStyle(
-                            color: Color(0xFFE33D55),
-                            fontStyle: FontStyle.italic)),
-                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
-                Stack(
-                  alignment: Alignment(0, 0),
+      body: Stack(children: [
+        SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
                   children: [
-                    Center(
-                      child: SizedBox(
-                        width: 200,
-                        height: 200,
-                        child: CircularProgressIndicator(
-                          value: progressFraction,
+                    Icon(
+                      Icons.location_on,
+                      color: Color(0xFFE33D55),
+                    ),
+                    Flexible(
+                      child: TextButton(
+                        onPressed: () async {
+                          //_getCurrentLocation();
+
+                          // for debugging purposes
+                          print("position incoming...");
+                          print(position.latitude);
+                          print(position.longitude);
+
+                          if (context.mounted) {
+                            Navigator.pushNamed(
+                              context,
+                              MapsPage.routeName,
+                              arguments: position,
+                            );
+                          }
+                        },
+                        child: Text(
+                          _currentAddress,
+                          style: TextStyle(fontSize: 15),
                         ),
                       ),
                     ),
-                    Center(
-                      child: Text(
-                        '$_remcounter' 's',
-                        style: TextStyle(
-                            fontSize: 60, fontWeight: FontWeight.bold),
-                      ),
-                    )
                   ],
                 ),
-                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+              ),
+
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  (_remcounter > 0)
+                      ? Text("")
+                      : Text("EMERGENCY SENT",
+                          style: TextStyle(
+                              color: Color(0xFFE33D55),
+                              fontStyle: FontStyle.italic)),
+                  Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+                  Stack(
+                    alignment: Alignment(0, 0),
+                    children: [
+                      Center(
+                        child: SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: CircularProgressIndicator(
+                            value: progressFraction,
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Text(
+                          '$_remcounter' 's',
+                          style: TextStyle(
+                              fontSize: 60, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ),
+                  Padding(padding: EdgeInsets.all(8.0)), // Add some padding
 
                 ElevatedButton(
                     onPressed: () {
@@ -494,6 +499,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Submit')) //can be made to disappear when skip is pressed?
           ],
         ),
+        
+      ]),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      floatingActionButton: FloatingActionButton.extended(
+        
+        
+        onPressed: () {
+          // Add your onPressed code here!
+        },
+        label: const Text('LogOut',style: TextStyle(color: Colors.white),),
+        icon: const Icon(Icons.logout_outlined,color: Colors.white,),
+        backgroundColor: Color(0xFF363F6E),
       ),
     );
   }
@@ -527,30 +544,31 @@ class _MapsPageState extends State<MapsPage> {
           colorSchemeSeed: Colors.green[700],
         ),
         home: Scaffold(
-            body: SafeArea(
-          child: GoogleMap(
-            onMapCreated: _onMapCreated,
-            markers: {
-              Marker(
-                markerId: MarkerId('marker_1'),
-                position:
-                    LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
-                draggable: true,
-                onDragEnd: (value) {},
-                infoWindow: InfoWindow(
-                  title: 'Marker 1',
-                  snippet: 'This is a snippet',
+          body: SafeArea(
+            child: GoogleMap(
+              onMapCreated: _onMapCreated,
+              markers: {
+                Marker(
+                  markerId: MarkerId('marker_1'),
+                  position: LatLng(
+                      args.latitude.toDouble(), args.longitude.toDouble()),
+                  draggable: true,
+                  onDragEnd: (value) {},
+                  infoWindow: InfoWindow(
+                    title: 'Marker 1',
+                    snippet: 'This is a snippet',
+                  ),
                 ),
+              },
+              myLocationEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target:
+                    LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
+                zoom: 16.0,
               ),
-            },
-            myLocationEnabled: true,
-            initialCameraPosition: CameraPosition(
-              target:
-                  LatLng(args.latitude.toDouble(), args.longitude.toDouble()),
-              zoom: 16.0,
             ),
           ),
-        )));
+        ));
   }
 }
 
