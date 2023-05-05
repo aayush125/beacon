@@ -44,6 +44,7 @@ dependencies:
   authentication: ^0.0.1
   google_fonts: ^4.0.3
   shared_preferences: ^2.1.0
+  web_socket_channel: ^2.4.0
 
 
 dev_dependencies:

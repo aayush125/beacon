@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'auth.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 // void main() {
 //   runApp(MyApp());
@@ -170,6 +171,11 @@ class _MyHomePageState extends State<MyHomePage> {
   late Position position;
   String _currentAddress = "Waiting for location...";
   AuthAPI authAPI = AuthAPI();
+  var _channel;
+  bool isPolice = false;
+  bool isFire = false;
+  bool isMedical = false;
+  bool isChecked = false;
 
   @override
   void initState() {
@@ -229,7 +235,21 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _remcounter = 0;
       progressFraction = 100;
+      isPolice = isChecked ? isPolice : true;
     });
+  }
+
+  void _skipToEmergency(bool police, bool medical, bool fire) {
+    print("isPolice: $isPolice");
+    print("isFire: $isFire");
+    print("isMedical: $isMedical");
+    // _channel = WebSocketChannel.connect(Uri.parse(''));
+    // _channel.sink.add({'token': token, 'police' : police, 'medical': medical, 'fire': fire});
+  }
+
+  void _sendEmergency(bool police, bool medical, bool fire) {
+    // _channel = WebSocketChannel.connect(Uri.parse(''));
+    // _channel.sink.add({'token' : token, 'police': police, 'medical': medical, 'fire': fire});
   }
 
   int get counter => _remcounter;
@@ -314,6 +334,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ElevatedButton(
                     onPressed: () {
                       _resetCounter();
+                      _skipToEmergency(isPolice, isMedical, isFire);
                     },
                     child: Text('Skip')),
                 //Text(appState.current.asLowerCase),
@@ -325,10 +346,25 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    print(isFire);
+                    setState(() {
+                      isFire = !isFire;
+                    });
+                    print(isFire);
+                  },
                   icon: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Checkbox(
+                          checkColor: Colors.white,
+                          value: isFire,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isFire = value!;
+                              isChecked = true;
+                            });
+                          }),
                       Icon(
                         Icons.local_fire_department_outlined,
                         color: Colors.white,
@@ -336,7 +372,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       Text(
                         "FIRE",
-                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w100,
+                            color: Colors.white),
                       ),
                     ],
                   ),
@@ -351,21 +390,36 @@ class _MyHomePageState extends State<MyHomePage> {
                     elevation: 10,
                     shadowColor: Colors.black,
                   ),
-                  
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    print(isMedical);
+                    setState(() {
+                      isMedical = !isMedical;
+                      isChecked = true;
+                    });
+                    print(isMedical);
+                  },
                   icon: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Checkbox(
+                          checkColor: Colors.white,
+                          value: isMedical,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isMedical = value!;
+                            });
+                          }),
                       Icon(
                         Icons.local_hospital_outlined,
                         color: Colors.white,
                         size: 50,
                       ),
                       Text(
-                        "HOSPITAL",textAlign: TextAlign.center,
-                        style: TextStyle( fontSize: 14,color: Colors.white),
+                        "HOSPITAL",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14, color: Colors.white),
                       ),
                     ],
                   ),
@@ -382,10 +436,25 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    print(isPolice);
+                    setState(() {
+                      isPolice = !isPolice;
+                      isChecked = true;
+                    });
+                    print(isPolice);
+                  },
                   icon: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Checkbox(
+                          checkColor: Colors.white,
+                          value: isPolice,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isPolice = value!;
+                            });
+                          }),
                       Icon(
                         Icons.local_police_outlined,
                         color: Colors.white,
@@ -394,7 +463,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       Padding(padding: EdgeInsets.only(bottom: 10)),
                       Text(
                         "POLICE",
-                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w100,
+                            color: Colors.white),
                       ),
                     ],
                   ),
@@ -409,22 +481,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     elevation: 10,
                     shadowColor: Colors.black,
                   ),
-                )
-                ,
+                ),
               ],
             ),
             Padding(padding: EdgeInsets.all(8)),
-            SizedBox()   ,         ElevatedButton(
-                    onPressed: () {
-                     
-                    },
-                    child: Text('Submit')) //can be made to disappear when skip is pressed?
-                    
-          
+            SizedBox(),
+            ElevatedButton(
+                onPressed: () {
+                  _sendEmergency(isPolice, isMedical, isFire);
+                },
+                child: Text(
+                    'Submit')) //can be made to disappear when skip is pressed?
           ],
-          
         ),
-        
       ),
     );
   }
