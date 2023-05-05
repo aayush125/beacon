@@ -67,13 +67,7 @@ class MyApp extends StatelessWidget {
 
     test.printAll();
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<UserCubit>(
-          create: (BuildContext context) => UserCubit(test),
-        ),
-      ],
-      child: MaterialApp(
+    return MaterialApp(
         title: 'Namer App',
         routes: {
           MapsPage.routeName: (context) => const MapsPage(),
@@ -88,8 +82,7 @@ class MyApp extends StatelessWidget {
         home: kDebugMode
             ? AddDialog(status: status)
             : (status ? MyHomePage() : Auth()),
-      ),
-    );
+      );
   }
 }
 
@@ -190,12 +183,11 @@ class _MyHomePageState extends State<MyHomePage> {
     String temp = await _getAddressFromLatLng();
     print("getcurrent something");
     print(token);
-    var user = await authAPI.getUserw(token);
-    print("user here");
-    print(user.body);
-    setState(() {
+    if (mounted) {
+      setState(() {
       _currentAddress = temp;
     });
+    }
   }
 
   Future<String> _getAddressFromLatLng() async {
@@ -221,7 +213,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _remcounter = 15;
     isTimerActive = true;
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
+      if (mounted) {
+        setState(() {
         if (_remcounter > 0) {
           _remcounter--;
           progressFraction = (_totcounter - _remcounter) / _totcounter;
@@ -229,6 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
           timer.cancel();
         }
       });
+      }
     });
   }
 
@@ -336,182 +330,231 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   Padding(padding: EdgeInsets.all(8.0)), // Add some padding
 
-                ElevatedButton(
-                    onPressed: () {
-                      _resetCounter();
-                      _skipToEmergency(isPolice, isMedical, isFire);
-                    },
-                    child: Text('Skip')),
-                //Text(appState.current.asLowerCase),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+                  ElevatedButton(
+                      onPressed: () {
+                        _resetCounter();
+                        _skipToEmergency(isPolice, isMedical, isFire);
+                      },
+                      child: Text('Skip')),
+                  //Text(appState.current.asLowerCase),
+                ],
+              ),
+              Padding(padding: EdgeInsets.all(8.0)), // Add some padding
 
-            Row(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      print(isFire);
+                      setState(() {
+                        isFire = !isFire;
+                      });
+                      print(isFire);
+                    },
+                    icon: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                            checkColor: Colors.white,
+                            value: isFire,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isFire = value!;
+                                isChecked = true;
+                              });
+                            }),
+                        Icon(
+                          Icons.local_fire_department_outlined,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                        Text(
+                          "FIRE",
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w100,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    label: SizedBox.shrink(),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFFDF465B),
+                      fixedSize: Size(105, 144),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 10,
+                      shadowColor: Colors.black,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      print(isMedical);
+                      setState(() {
+                        isMedical = !isMedical;
+                        isChecked = true;
+                      });
+                      print(isMedical);
+                    },
+                    icon: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                            checkColor: Colors.white,
+                            value: isMedical,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isMedical = value!;
+                              });
+                            }),
+                        Icon(
+                          Icons.local_hospital_outlined,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                        Text(
+                          "HOSPITAL",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    label: SizedBox.shrink(),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFFDF465B),
+                      fixedSize: Size(105, 144),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 10,
+                      shadowColor: Colors.black,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      print(isPolice);
+                      setState(() {
+                        isPolice = !isPolice;
+                        isChecked = true;
+                      });
+                      print(isPolice);
+                    },
+                    icon: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                            checkColor: Colors.white,
+                            value: isPolice,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isPolice = value!;
+                              });
+                            }),
+                        Icon(
+                          Icons.local_police_outlined,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                        Padding(padding: EdgeInsets.only(bottom: 10)),
+                        Text(
+                          "POLICE",
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w100,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    label: SizedBox.shrink(),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFFDF465B),
+                      fixedSize: Size(105, 144),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 10,
+                      shadowColor: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              Padding(padding: EdgeInsets.all(8)),
+              SizedBox(),
+              ElevatedButton(
+                  onPressed: () {
+                    _sendEmergency(isPolice, isMedical, isFire);
+                  },
+                  child: Text(
+                      'Submit')) //can be made to disappear when skip is pressed?
+            ],
+          ),
+        ),
+        SlidingUpPanel(
+          minHeight: 100,
+          maxHeight: 300,
+          panel: Column(children: [
+            Text("Name: ${theUser.name}"),
+            Text("Phone: ${theUser.phone}"),
+            Text("Email: ${theUser.email}"),
+            Text("Date of Birth: ${theUser.dateOfBirth}"),
+            Text("Blood Group: ${theUser.blood}"),
+            Text("Address: ${theUser.address}"),
+            Text("Document Type/ID: ${theUser.docType}/${theUser.docID}"),
+          ]),
+          collapsed: Container(
+            decoration: BoxDecoration(
+                color: Color(0xffeaeaeb)),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                ElevatedButton.icon(
-                  onPressed: () {
-                    print(isFire);
-                    setState(() {
-                      isFire = !isFire;
-                    });
-                    print(isFire);
-                  },
-                  icon: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Checkbox(
-                          checkColor: Colors.white,
-                          value: isFire,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              isFire = value!;
-                              isChecked = true;
-                            });
-                          }),
-                      Icon(
-                        Icons.local_fire_department_outlined,
-                        color: Colors.white,
-                        size: 50,
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          theUser.name!,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       Text(
-                        "FIRE",
+                        theUser.phone!,
                         style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w100,
-                            color: Colors.white),
+                          color: Colors.grey[500],
+                        ),
                       ),
+                      ElevatedButton(onPressed: 
+                      () async {
+                        AuthAPI authAPI = AuthAPI();
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        prefs.remove('token');
+                        prefs.remove('isLoggedIn');
+                        var res = await authAPI.logout(token);
+                        token = '';
+                        print(res.body);
+                        if (context.mounted) Navigator.pushNamedAndRemoveUntil(context, '/auth' , (route) => false);
+                      }, 
+                      child: Text("Logout"))
                     ],
                   ),
-                  label: SizedBox.shrink(),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B),
-                    fixedSize: Size(105, 144),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 10,
-                    shadowColor: Colors.black,
-                  ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    print(isMedical);
-                    setState(() {
-                      isMedical = !isMedical;
-                      isChecked = true;
-                    });
-                    print(isMedical);
-                  },
-                  icon: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Checkbox(
-                          checkColor: Colors.white,
-                          value: isMedical,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              isMedical = value!;
-                            });
-                          }),
-                      Icon(
-                        Icons.local_hospital_outlined,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                      Text(
-                        "HOSPITAL",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  label: SizedBox.shrink(),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B),
-                    fixedSize: Size(105, 144),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 10,
-                    shadowColor: Colors.black,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    print(isPolice);
-                    setState(() {
-                      isPolice = !isPolice;
-                      isChecked = true;
-                    });
-                    print(isPolice);
-                  },
-                  icon: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Checkbox(
-                          checkColor: Colors.white,
-                          value: isPolice,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              isPolice = value!;
-                            });
-                          }),
-                      Icon(
-                        Icons.local_police_outlined,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      Text(
-                        "POLICE",
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w100,
-                            color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  label: SizedBox.shrink(),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFFDF465B),
-                    fixedSize: Size(105, 144),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 10,
-                    shadowColor: Colors.black,
-                  ),
-                ),
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: AssetImage('assets/sounds/IMG_0751.JPG'),
+                )
               ],
             ),
-            Padding(padding: EdgeInsets.all(8)),
-            SizedBox(),
-            ElevatedButton(
-                onPressed: () {
-                  _sendEmergency(isPolice, isMedical, isFire);
-                },
-                child: Text(
-                    'Submit')) //can be made to disappear when skip is pressed?
-          ],
+          ),
         ),
-        
       ]),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton: FloatingActionButton.extended(
-        
-        
-        onPressed: () {
-          // Add your onPressed code here!
-        },
-        label: const Text('LogOut',style: TextStyle(color: Colors.white),),
-        icon: const Icon(Icons.logout_outlined,color: Colors.white,),
-        backgroundColor: Color(0xFF363F6E),
-      ),
     );
   }
 }

@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
+import 'auth.dart';
+import 'user.dart';
+import 'authentication.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var status = prefs.getBool('isLoggedIn') ?? false;
+  token = prefs.getString('token') ?? '';
+  print("status incoming bro");
+  print(status);
+  print(token);
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp(
+    status: status,
+  ));
 }
 
+var serverAddress = '';
+var token = '';
+User theUser = User();
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool status;
+
+  const MyApp({
+    this.status = false,
+    Key? key,
+  }) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -24,8 +48,77 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: kDebugMode
+            ? AddDialog(status: status)
+            : (status ? MyHomePage(title: "Beacon Responder",) : Auth()),
     );
+  }
+}
+
+
+class AddDialog extends StatefulWidget {
+  final bool status;
+  const AddDialog({required this.status, Key? key}) : super(key: key);
+
+  @override
+  State<AddDialog> createState() => _AddDialogState();
+}
+
+class _AddDialogState extends State<AddDialog> {
+  final dialogFieldController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    dialogFieldController.text = serverAddress;
+    return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10))),
+        title: Text("[DEBUG] Change Server"),
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextField(
+              controller: dialogFieldController,
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  dialogFieldController.text = '10.0.2.2:5173';
+                },
+                child: Text("Server on emulator PC")),
+            ElevatedButton(
+                onPressed: () {
+                  dialogFieldController.text =
+                      'testsite.southeastasia.cloudapp.azure.com:4173';
+                },
+                child: Text("Online Server")),
+            Padding(padding: EdgeInsets.only(bottom: 30)),
+            ElevatedButton(
+                onPressed: () async {
+                  serverAddress = dialogFieldController.text;
+                  if (token != '') {
+                    AuthAPI authAPI = AuthAPI();
+                    print('token here');
+                    print(token);
+                    var user = await authAPI.getRes(token);
+                    print("user here");
+                    print(user.body);
+                    theUser = User.fromReqBody(user.body);
+                    print(theUser);
+                  }
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              (widget.status ? MyHomePage(title: "Beacon Responder",) : Auth())),
+                    );
+                  }
+                },
+                child: Text("Confirm")),
+          ],
+        ));
   }
 }
 

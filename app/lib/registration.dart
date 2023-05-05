@@ -250,6 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       await SharedPreferences.getInstance();
                   prefs.setBool("isLoggedIn", true);
                   prefs.setString('token', user.token!);
+                  theUser = user;
                   token = user.token!;
                   if (context.mounted) {
                     Navigator.pushReplacement(context,
@@ -369,6 +370,7 @@ class _LoginPageState extends State<LoginPage> {
                       await SharedPreferences.getInstance();
                   prefs.setBool("isLoggedIn", true);
                   prefs.setString('token', user.token!);
+                  theUser = user;
                   token = user.token!;
                   if (context.mounted) {
                     Navigator.pushReplacement(context,
