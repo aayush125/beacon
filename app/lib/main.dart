@@ -17,11 +17,6 @@ import 'user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'auth.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-
-// void main() {
-//   runApp(MyApp());
-// }
 
 var token = '';
 User theUser = User();
@@ -488,6 +483,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ElevatedButton(
                   onPressed: () {
                     _sendEmergency(isPolice, isMedical, isFire);
+                  
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //       builder: (context) => const UserSide()),
+                    // );
                   },
                   child: Text(
                       'Submit')) //can be made to disappear when skip is pressed?
@@ -555,9 +556,39 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ]),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // Add your onPressed code here!
+        },
+        label: const Text(
+          'LogOut',
+          style: TextStyle(color: Colors.white),
+        ),
+        icon: const Icon(
+          Icons.logout_outlined,
+          color: Colors.white,
+        ),
+        backgroundColor: Color(0xFF363F6E),
+      ),
     );
   }
 }
+
+
+class UserSide extends StatelessWidget {
+  const UserSide({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Status'),
+      ),
+      
+    );
+  }
+} 
 
 class MapsPage extends StatefulWidget {
   const MapsPage({super.key});
