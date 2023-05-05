@@ -1,11 +1,10 @@
 import 'dart:async';
+// import 'dart:developer';
 
-import 'package:beacon/prefs.dart';
-import 'package:english_words/english_words.dart';
+// import 'package:beacon/prefs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -176,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _getCurrentLocation();
+    startTimer();
   }
 
   _getCurrentLocation() async {
@@ -205,26 +205,40 @@ class _MyHomePageState extends State<MyHomePage> {
     return await json.decode(response.body)['results'][0]['formatted_address'];
   }
 
+  bool isTimerActive = false;
+  int _totcounter = 15;
+  int _remcounter = 15;
+  double progressFraction = 0.0;
+  Timer? timer;
+  void startTimer() {
+    _remcounter = 15;
+    isTimerActive = true;
+    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_remcounter > 0) {
+          _remcounter--;
+          progressFraction = (_totcounter - _remcounter) / _totcounter;
+        } else {
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  void _resetCounter() {
+    setState(() {
+      _remcounter = 0;
+      progressFraction = 100;
+    });
+  }
+
+  int get counter => _remcounter;
   @override
   Widget build(BuildContext context) {
     AuthAPI authAPI = AuthAPI();
     //var appState = context.watch<MyAppState>();
 
     return Scaffold(
-      /*body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('A very random idea:'),
-            Text(appState.current.asLowerCase),
-      
-            ElevatedButton( 
-              onPressed: toggleSound,
-              child: Text('Music'), 
-            ),
-          ],
-        ),
-      ),*/
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -266,24 +280,151 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('A very random idea:'),
-                //Text(appState.current.asLowerCase),
-                ElevatedButton(
-                  onPressed: () async {
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.clear();
-                    if (context.mounted)
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, Auth.routeName, (route) => false);
-                  },
-                  child: Text('Logout'),
+              children: <Widget>[
+                (_remcounter > 0)
+                    ? Text("")
+                    : Text("EMERGENCY SENT",
+                        style: TextStyle(
+                            color: Color(0xFFE33D55),
+                            fontStyle: FontStyle.italic)),
+                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+                Stack(
+                  alignment: Alignment(0, 0),
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        width: 200,
+                        height: 200,
+                        child: CircularProgressIndicator(
+                          value: progressFraction,
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        '$_remcounter' 's',
+                        style: TextStyle(
+                            fontSize: 60, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  ],
                 ),
+                Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+
+                ElevatedButton(
+                    onPressed: () {
+                      _resetCounter();
+                    },
+                    child: Text('Skip')),
+                //Text(appState.current.asLowerCase),
               ],
             ),
+            Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_fire_department_outlined,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                      Text(
+                        "FIRE",
+                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  label: SizedBox.shrink(),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFFDF465B),
+                    fixedSize: Size(105, 144),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 10,
+                    shadowColor: Colors.black,
+                  ),
+                  
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_hospital_outlined,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                      Text(
+                        "HOSPITAL",textAlign: TextAlign.center,
+                        style: TextStyle( fontSize: 14,color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  label: SizedBox.shrink(),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFFDF465B),
+                    fixedSize: Size(105, 144),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 10,
+                    shadowColor: Colors.black,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_police_outlined,
+                        color: Colors.white,
+                        size: 50,
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      Text(
+                        "POLICE",
+                        style: TextStyle(fontSize: 14,fontWeight: FontWeight.w100,color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  label: SizedBox.shrink(),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFFDF465B),
+                    fixedSize: Size(105, 144),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 10,
+                    shadowColor: Colors.black,
+                  ),
+                )
+                ,
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            SizedBox()   ,         ElevatedButton(
+                    onPressed: () {
+                     
+                    },
+                    child: Text('Submit')) //can be made to disappear when skip is pressed?
+                    
+          
           ],
+          
         ),
+        
       ),
     );
   }
@@ -341,23 +482,6 @@ class _MapsPageState extends State<MapsPage> {
             ),
           ),
         )));
-  }
-}
-
-final player = AudioPlayer();
-
-// Function to play sound
-void toggleSound() async {
-  if (player.state == PlayerState.playing) {
-    print('music paused!');
-    await player.pause();
-  } else if (player.state == PlayerState.paused) {
-    print('music playing!');
-    await player.resume();
-  } else {
-    print('music starting!');
-    await player.setSourceAsset("sounds/geet.mp3");
-    await player.resume();
   }
 }
 
