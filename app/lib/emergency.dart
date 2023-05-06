@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'auth.dart';
+import 'main.dart';
 
 class Emergency extends StatefulWidget {
   const Emergency({Key? key}) : super(key: key);
@@ -26,21 +27,53 @@ class Emergency extends StatefulWidget {
 }
 
 class EmergencyState extends State<Emergency> {
+  late GoogleMapController mapController;
+
+  //final LatLng _center = const LatLng(27.688415, 85.335490);
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Emergency"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Emergency"),
-          ],
-        ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Emergency status: Verifying..."),
+          Padding(padding: EdgeInsets.all(10.0)),
+          Expanded(
+              child: SizedBox(
+            height: 200.0,
+            child: GoogleMap(
+              onMapCreated: _onMapCreated,
+              markers: {
+                Marker(
+                  markerId: MarkerId('marker_1'),
+                  position: LatLng(position.latitude.toDouble(),
+                      position.longitude.toDouble()),
+                  draggable: true,
+                  onDragEnd: (value) {},
+                  infoWindow: InfoWindow(
+                    title: 'Marker 1',
+                    snippet: 'This is a snippet',
+                  ),
+                ),
+              },
+              myLocationEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(position.latitude.toDouble(),
+                    position.longitude.toDouble()),
+                zoom: 16.0,
+              ),
+            ),
+          ))
+        ],
       ),
     );
-    
   }
 }

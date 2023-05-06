@@ -17,9 +17,12 @@ import 'user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'auth.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'emergency.dart';
 
 var token = '';
 User theUser = User();
+late Position position;
+bool gotPosition = false;
 
 Future<void> main() async {
   AuthAPI authAPI = AuthAPI();
@@ -138,7 +141,7 @@ class _AddDialogState extends State<AddDialog> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
+                          builder: (context) => //Emergency()),
                               (widget.status ? MyHomePage() : Auth())),
                     );
                   }
@@ -157,7 +160,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late Position position;
   String _currentAddress = "Waiting for location...";
   AuthAPI authAPI = AuthAPI();
   var _channel;
@@ -175,6 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _getCurrentLocation() async {
     position = await _determinePosition();
+    gotPosition = true;
     String temp = await _getAddressFromLatLng();
     print("getcurrent something");
     print(token);
@@ -491,7 +494,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     // );
                   },
                   child: Text(
-                      'Submit')) //can be made to disappear when skip is pressed?
+                      'Submit')),
+              ElevatedButton(
+                  onPressed: gotPosition ? () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const Emergency()));
+                  
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //       builder: (context) => const UserSide()),
+                    // );
+                  } : null,
+                  child: Text(
+                      'Go emergency')) //can be made to disappear when skip is pressed?
             ],
           ),
         ),
@@ -556,39 +571,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ]),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Add your onPressed code here!
-        },
-        label: const Text(
-          'LogOut',
-          style: TextStyle(color: Colors.white),
-        ),
-        icon: const Icon(
-          Icons.logout_outlined,
-          color: Colors.white,
-        ),
-        backgroundColor: Color(0xFF363F6E),
-      ),
     );
   }
 }
-
-
-class UserSide extends StatelessWidget {
-  const UserSide({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Status'),
-      ),
-      
-    );
-  }
-} 
 
 class MapsPage extends StatefulWidget {
   const MapsPage({super.key});
