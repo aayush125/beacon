@@ -12,7 +12,6 @@ def get_provider(token: Union[str, None] = Cookie(default=None, alias="provider_
   session = Session(engine)
   statement = select(Provider).where(Provider.hashed_token == hash_token(token))
   user = session.exec(statement).one_or_none()
-  session.close()
 
   if (user is None):
     raise CredentialsException

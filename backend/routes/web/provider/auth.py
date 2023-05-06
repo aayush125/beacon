@@ -1,12 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 from cloudinary.uploader import upload
 from fastapi.responses import Response
+from typing import Annotated
 
 from db import engine, Provider
 from utils.crypt import gen_token, pw_context
 from utils.exceptions import CredentialsException
 from utils.types import FormStr, FormInt, FormFloat, FormFile, FormType
+from routes.web.provider.depends import get_provider
 
 router = APIRouter()
 
@@ -23,7 +25,7 @@ def register_provider(
   type: FormType,
   img_pan: FormFile,
   img_reg: FormFile,
-  img_logo: FormFile 
+  img_logo: FormFile
 ):
   session = Session(engine)
 
@@ -81,3 +83,12 @@ def login_provider(username: FormStr, password: FormStr):
   session.commit()
 
   return res
+
+
+@router.post("/logout")
+def logout_provider(provider: Annotated[Provider, Depends(get_provider)]):
+  session = Session.object_session(provider)
+  provider.hashed_token = None
+  session.add(provider)
+  session.commit()
+  return

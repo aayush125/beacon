@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import web, app
+from routes import web, user_app, responder_app
 from db import init_db
 import cloudinary
 
@@ -15,7 +15,8 @@ cloudinary.config(
 api = FastAPI(root_path="/api")
 
 api.include_router(web.router)
-api.include_router(app.router)
+api.include_router(user_app.router)
+api.include_router(responder_app.router)
 
 @api.get("/")
 def read_root():

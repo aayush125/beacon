@@ -16,6 +16,8 @@ dependencies = [
     "email-validator>=2.0.0.post1",
     "passlib[bcrypt]>=1.7.4",
     "setuptools>=67.7.1",
+    "websockets>=11.0.2",
+    "geopy>=2.3.0",
 ]
 requires-python = ">=3.9"
 license = {text = "MIT"}

@@ -1,12 +1,13 @@
 from typing import Annotated
+from sqlmodel import Session, select
 from fastapi import APIRouter, Depends
 from pydantic import constr, EmailStr, BaseModel
-from sqlmodel import Session, select
 
 from db import engine, User
+from routes.user_app.depends import get_user
 from utils.crypt import gen_token, pw_context
 from utils.exceptions import CredentialsException
-from routes.app.depends import get_user
+from utils.types import PasswordStr, PhoneStr
 
 router = APIRouter()
 
@@ -24,10 +25,6 @@ def user_with_token(user: User, token: str):
     "docType": user.docType
   }
 
-
-PasswordStr = constr(min_length=3, max_length=16)
-PhoneStr = constr(min_length=10, max_length=10)
-
 class SignUpDetails(BaseModel):
   name: constr(max_length=50)
   email: EmailStr
@@ -40,7 +37,7 @@ class SignUpDetails(BaseModel):
   blood: str
 
 @router.post("/signup")
-def signupUser(info: SignUpDetails):
+def signup_user(info: SignUpDetails):
   pw_hash = pw_context.hash(info.password)
   token, token_hash = gen_token()
 
@@ -68,7 +65,7 @@ class LoginDetails(BaseModel):
   password: PasswordStr
 
 @router.post("/login")
-def loginUser(info: LoginDetails):
+def login_user(info: LoginDetails):
   session = Session(engine)
   statement = select(User).where(User.phone == info.phone)
   user = session.exec(statement).one_or_none()
@@ -90,14 +87,14 @@ def loginUser(info: LoginDetails):
 
 
 @router.post("/logout")
-def logoutUser(user: Annotated[User, Depends(get_user)]):
+def logout_user(user: Annotated[User, Depends(get_user)]):
+  session = Session.object_session(user)
   user.hashed_token = None
-  session = Session(engine)
   session.add(user)
   session.commit()
   return
 
 
 @router.post("/getUser")
-def getUser(user: Annotated[User, Depends(get_user)]):
+def get_user(user: Annotated[User, Depends(get_user)]):
   return user
