@@ -1,40 +1,36 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
+from time import time
 
 from utils.types import FormStr
 from routes.web.provider.depends import get_provider
 from db import engine, Responder, Provider, EmergencyStatus
 from utils.crypt import pw_context
-from time import time
 
 router = APIRouter()
 
 def is_available(responder: Responder):
-  min_limit = time() - 120
-
-  if responder.last_active_timestamp < min_limit:
-    return False
-  
-  for link in responder.emergency_links:
-    if link.emergency.status == EmergencyStatus.SENT:
-      return False
-  
-  return True
-
+  for conn in responder_connections:
+    if conn.responder.id == responder.id:
+      return conn.available
+  return False
 
 def responders_with_availibility(provider: Provider):
   ret = []
 
   for responder in provider.responders:
-    entry = responder.dict()
-    entry["available"] = is_available(responder)
+    entry = {
+      "id": responder.id,
+      "name": responder.name,
+      "phone": responder.phone,
+      "available": is_available(responder)
+    }
     ret.append(entry)
-
-  ret.sort(key = lambda r : r["available"])
 
   return ret
 
+from routes.responder_app.endpoints import responder_connections
 
 @router.post("/register_responder")
 def register_responder(

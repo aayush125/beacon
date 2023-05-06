@@ -1,5 +1,6 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Query
+from fastapi.websockets import WebSocketState
 from pydantic import constr, EmailStr, BaseModel
 from sqlmodel import Session, select
 
@@ -7,7 +8,7 @@ from db import engine, User, Emergency, EmergencyStatus, EmergencyType
 from utils.crypt import gen_token, pw_context
 from utils.exceptions import CredentialsException
 from routes.user_app.depends import get_user, get_user_query
-from emergency import manager, ServerEmergency
+from emergency import manager
 
 router = APIRouter(
   prefix="/emergency"
@@ -26,14 +27,14 @@ async def user_websocket(
   user: Annotated[User, Depends(get_user_query)]
 ):
   await ws.accept()
-  emergency = ServerEmergency(user, ws, lat, lng)
-  res = await manager.add_emergency(emergency)
+  await manager.create_emergency(user, ws, lat, lng, type)
 
-  if not res:
+  if ws.application_state != WebSocketState.CONNECTED:
     return
 
   try:
     while True:
       await ws.receive_json()
   except WebSocketDisconnect:
-    await manager.remove_emergency(emergency)
+    ws.application_state = WebSocketState.DISCONNECTED
+    await manager.cancel_emergency(user)

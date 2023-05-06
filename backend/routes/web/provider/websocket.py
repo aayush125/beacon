@@ -42,8 +42,8 @@ async def provider_websocket(ws: WebSocket, provider: Annotated[Provider, Depend
       # }
 
       if not data["accepted"]:
-        await manager.reject_emergency(data["emergency_id"])
+        await manager.provider_reject_emergency(data["emergency_id"], provider.name, provider.provider_type)
       else:
-        await manager.accept_emergency(data["emergency_id"], data["responder_id"])
+        await manager.provider_accept_emergency(data["emergency_id"], data["responder_id"], provider.provider_type)
   except WebSocketDisconnect:
     provider_connections.remove(current)
