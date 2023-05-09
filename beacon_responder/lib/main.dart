@@ -4,6 +4,15 @@ import 'user.dart';
 import 'authentication.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +31,8 @@ Future<void> main() async {
 var serverAddress = '';
 var token = '';
 User theUser = User();
+late Position position;
+bool gotPosition = false;
 
 class MyApp extends StatelessWidget {
   final bool status;
@@ -49,12 +60,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: kDebugMode
-            ? AddDialog(status: status)
-            : (status ? MyHomePage(title: "Beacon Responder",) : Auth()),
+          ? AddDialog(status: status)
+          : (status
+              ? MyHomePage(
+                  title: "Beacon Responder",
+                )
+              : Auth()),
     );
   }
 }
-
 
 class AddDialog extends StatefulWidget {
   final bool status;
@@ -97,6 +111,8 @@ class _AddDialogState extends State<AddDialog> {
             ElevatedButton(
                 onPressed: () async {
                   serverAddress = dialogFieldController.text;
+                  position = await _determinePosition();
+                  gotPosition = true;
                   if (token != '') {
                     AuthAPI authAPI = AuthAPI();
                     print('token here');
@@ -111,8 +127,11 @@ class _AddDialogState extends State<AddDialog> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              (widget.status ? MyHomePage(title: "Beacon Responder",) : Auth())),
+                          builder: (context) => (widget.status
+                              ? MyHomePage(
+                                  title: "Beacon Responder",
+                                )
+                              : Auth())),
                     );
                   }
                 },
@@ -141,68 +160,80 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  late GoogleMapController mapController;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  //final LatLng _center = const LatLng(27.688415, 85.335490);
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("Emergency"),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+              child: SizedBox(
+            height: 200.0,
+            child: GoogleMap(
+              onMapCreated: _onMapCreated,
+              markers: {
+                Marker(
+                  markerId: MarkerId('marker_1'),
+                  position: LatLng(position.latitude.toDouble(),
+                      position.longitude.toDouble()),
+                  draggable: true,
+                  onDragEnd: (value) {},
+                  infoWindow: InfoWindow(
+                    title: 'Marker 1',
+                    snippet: 'This is a snippet',
+                    onTap: () {
+                      UrlLauncher.launchUrl(Uri.parse("tel://911"));
+                    },
+                  ),
+                ),
+              },
+              myLocationEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(position.latitude.toDouble(),
+                    position.longitude.toDouble()),
+                zoom: 16.0,
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
+          ))
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  print("Position fetched!!!");
+  return await Geolocator.getCurrentPosition();
 }

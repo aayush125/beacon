@@ -18,6 +18,7 @@ import 'user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'auth.dart';
 import 'main.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Emergency extends StatefulWidget {
   const Emergency({Key? key}) : super(key: key);
@@ -27,6 +28,8 @@ class Emergency extends StatefulWidget {
 }
 
 class EmergencyState extends State<Emergency> {
+  final nameController = TextEditingController();
+  final allergyController = TextEditingController();
   late GoogleMapController mapController;
 
   //final LatLng _center = const LatLng(27.688415, 85.335490);
@@ -71,7 +74,7 @@ class EmergencyState extends State<Emergency> {
                 zoom: 16.0,
               ),
             ),
-          ))
+          )),
         ],
       ),
     );

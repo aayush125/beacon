@@ -353,15 +353,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     icon: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Checkbox(
-                            checkColor: Colors.white,
-                            value: isFire,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isFire = value!;
-                                isChecked = true;
-                              });
-                            }),
+                        // Checkbox(
+                        //     checkColor: Colors.white,
+                        //     value: isFire,
+                        //     onChanged: (bool? value) {
+                        //       setState(() {
+                        //         isFire = value!;
+                        //         isChecked = true;
+                        //       });
+                        //     }),
                         Icon(
                           Icons.local_fire_department_outlined,
                           color: Colors.white,
@@ -379,7 +379,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     label: SizedBox.shrink(),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFFDF465B),
+                      backgroundColor:
+                          isFire ? Color(0xFF363F6E) : Color(0xFFDF465B),
                       fixedSize: Size(105, 144),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -400,14 +401,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     icon: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Checkbox(
-                            checkColor: Colors.white,
-                            value: isMedical,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isMedical = value!;
-                              });
-                            }),
+                        // Checkbox(
+                        //     checkColor: Colors.white,
+                        //     value: isMedical,
+                        //     onChanged: (bool? value) {
+                        //       setState(() {
+                        //         isMedical = value!;
+                        //       });
+                        //     }),
                         Icon(
                           Icons.local_hospital_outlined,
                           color: Colors.white,
@@ -423,7 +424,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     label: SizedBox.shrink(),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFFDF465B),
+                      backgroundColor: isMedical? Color(0xFF363F6E): Color(0xFFDF465B),
                       fixedSize: Size(105, 144),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -444,14 +445,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     icon: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Checkbox(
-                            checkColor: Colors.white,
-                            value: isPolice,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isPolice = value!;
-                              });
-                            }),
+                        // Checkbox(
+                        //     checkColor: Colors.white,
+                        //     value: isPolice,
+                        //     onChanged: (bool? value) {
+                        //       setState(() {
+                        //         isPolice = value!;
+                        //       });
+                        //     }),
                         Icon(
                           Icons.local_police_outlined,
                           color: Colors.white,
@@ -470,7 +471,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     label: SizedBox.shrink(),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFFDF465B),
+                      backgroundColor:
+                          isPolice ? Color(0xFF363F6E) : Color(0xFFDF465B),
                       fixedSize: Size(105, 144),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),

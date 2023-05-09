@@ -28,13 +28,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final List<String> _bloodGroup = <String>[
     'A+ (A positive)',
-    'A− (A negative)',
+    'A- (A negative)',
     'B+ (B positive)',
-    'B− (B negative)',
+    'B- (B negative)',
     'AB+ (AB positive)',
-    'AB− (AB negative)',
+    'AB- (AB negative)',
     'O+ (O positive)',
-    'O− (O negative)'
+    'O- (O negative)'
   ];
   String? dropdownValue1;
   final List<String> _documentType = <String>[

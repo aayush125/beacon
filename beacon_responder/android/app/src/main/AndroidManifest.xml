@@ -4,6 +4,10 @@
         android:label="beacon_responder"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBKEI1M_LZSWWEa6AMJCorqfSsVXgD79ns"/>
+            
         <activity
             android:name=".MainActivity"
             android:exported="true"
