@@ -14,6 +14,14 @@ class Provider(SQLModel, table = True):
     email: str
     provider_type: str = Literal["fire", "medical", "police"]
 
+class Responder(SQLModel, table = True):
+    id: int = Field(primary_key = True)
+    responder_name: str
+    address: str
+    contact_number: str
+    email:str
+    provider_name: str
+
 engine = create_engine("postgresql://beacon:a@localhost/beacon", echo = True)
 
 def init_db():

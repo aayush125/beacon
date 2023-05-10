@@ -1,6 +1,8 @@
 <script>
 import responder_placeholder from "@/assets/responder_placeholder.svg"
 import beaconLogo from '@/assets/beacon_logo_backdrop.svg'
+import ResponderRegistration from "../../register_responder/ResponderRegistration.svelte";
+import RouteButton from "@/lib/RouteButton.svelte";
 
 
 </script>
@@ -25,6 +27,9 @@ import beaconLogo from '@/assets/beacon_logo_backdrop.svg'
           </header>
         </div>
       </div>
+      
+      <RouteButton route="/register_responder">Register New Responders</RouteButton>
+
 
        <article>
         <details>

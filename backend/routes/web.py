@@ -1,7 +1,7 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, File, Form, UploadFile
 from sqlmodel import Session
-from db import engine, Provider
+from db import engine, Provider, Responder
 from cloudinary.uploader import upload
 
 router = APIRouter(
@@ -44,9 +44,35 @@ def register_provider(
     provider_type=type
   )
   session.add(provider)
-  
+
   session.commit()
 
-  upload(img_pan.file, public_id=f"{provider.id}_pan")
+  upload(img_pan.file, public_id=f"{provider.id}_pan")  
   upload(img_reg.file, public_id=f"{provider.id}_reg")
   upload(img_logo.file, public_id=f"{provider.id}_logo")
+
+
+@router.post("/responder/register")
+def register_responder(
+  responder_name: FormStr,
+  address: FormStr,
+  contact_number: FormStr,
+  email: FormStr,
+  img_citizenship: FormFile,
+):
+  
+  session = Session(engine)
+
+  responder = Responder(
+    responder_name = responder_name,
+    address = address,
+    contact_number = contact_number,
+    email = email
+  )
+  session.add(responder)
+  
+  session.commit()
+  
+  upload(img_citizenship.file, public_id=f"{responder.id}_citizenship")
+
+
