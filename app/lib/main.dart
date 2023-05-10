@@ -66,21 +66,21 @@ class MyApp extends StatelessWidget {
     test.printAll();
 
     return MaterialApp(
-        title: 'Namer App',
-        routes: {
-          MapsPage.routeName: (context) => const MapsPage(),
-          RegisterPage.routeName: (context) => const RegisterPage(),
-          Auth.routeName: (context) => Auth(),
-        },
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-          textTheme: GoogleFonts.nunitoSansTextTheme(),
-        ),
-        home: kDebugMode
-            ? AddDialog(status: status)
-            : (status ? MyHomePage() : Auth()),
-      );
+      title: 'Namer App',
+      routes: {
+        MapsPage.routeName: (context) => const MapsPage(),
+        RegisterPage.routeName: (context) => const RegisterPage(),
+        Auth.routeName: (context) => Auth(),
+      },
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        textTheme: GoogleFonts.nunitoSansTextTheme(),
+      ),
+      home: kDebugMode
+          ? AddDialog(status: status)
+          : (status ? MyHomePage() : Auth()),
+    );
   }
 }
 
@@ -160,6 +160,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
   String _currentAddress = "Waiting for location...";
   AuthAPI authAPI = AuthAPI();
   var _channel;
@@ -183,8 +184,8 @@ class _MyHomePageState extends State<MyHomePage> {
     print(token);
     if (mounted) {
       setState(() {
-      _currentAddress = temp;
-    });
+        _currentAddress = temp;
+      });
     }
   }
 
@@ -213,15 +214,19 @@ class _MyHomePageState extends State<MyHomePage> {
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
-        if (_remcounter > 0) {
-          _remcounter--;
-          progressFraction = (_totcounter - _remcounter) / _totcounter;
-        } else {
-          timer.cancel();
-        }
-      });
+          if (_remcounter > 0) {
+            _remcounter--;
+            progressFraction = (_totcounter - _remcounter) / _totcounter;
+          } else {
+            timer.cancel();
+          }
+        });
       }
     });
+  }
+
+  Text something() {
+    return Text("EMERGENCY SENT");
   }
 
   void _resetCounter() {
@@ -250,6 +255,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     AuthAPI authAPI = AuthAPI();
     //var appState = context.watch<MyAppState>();
+
+    final panelController = PanelController();
 
     return Scaffold(
       //SlidingUpPanel(panel: Center(child: Text("This is the sliding Widget"),),),
@@ -298,13 +305,12 @@ class _MyHomePageState extends State<MyHomePage> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  (_remcounter > 0)
-                      ? Text("")
-                      : Text("EMERGENCY SENT",
-                          style: TextStyle(
-                              color: Color(0xFFE33D55),
-                              fontStyle: FontStyle.italic)),
-                  Padding(padding: EdgeInsets.all(8.0)), // Add some padding
+                  (_remcounter > 0) ? Text("") : something(),
+                  // : Text("EMERGENCY SENT",
+                  //     style: TextStyle(
+                  //         color: Color(0xFFE33D55),
+                  //         fontStyle: FontStyle.italic)),
+                  Padding(padding: EdgeInsets.all(8.0)),
                   Stack(
                     alignment: Alignment(0, 0),
                     children: [
@@ -333,7 +339,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         _resetCounter();
                         _skipToEmergency(isPolice, isMedical, isFire);
                       },
-                      child: Text('Skip')),
+                      child: Text('Cancel')),
                   //Text(appState.current.asLowerCase),
                 ],
               ),
@@ -380,7 +386,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor:
-                          isFire ? Color(0xFF363F6E) : Color(0xFFDF465B),
+                          isFire ? Color(0xFF252A48) : Color(0xFFDF465B),
                       fixedSize: Size(105, 144),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -424,7 +430,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     label: SizedBox.shrink(),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: isMedical? Color(0xFF363F6E): Color(0xFFDF465B),
+                      backgroundColor:
+                          isMedical ? Color(0xFF252A48) : Color(0xFFDF465B),
                       fixedSize: Size(105, 144),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -472,7 +479,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor:
-                          isPolice ? Color(0xFF363F6E) : Color(0xFFDF465B),
+                          isPolice ? Color(0xFF252A48) : Color(0xFFDF465B),
                       fixedSize: Size(105, 144),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -485,89 +492,172 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Padding(padding: EdgeInsets.all(8)),
               SizedBox(),
+
               ElevatedButton(
-                  onPressed: () {
-                    _sendEmergency(isPolice, isMedical, isFire);
-                  
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const UserSide()),
-                    // );
-                  },
+                  onPressed: gotPosition
+                      ? () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Emergency()));
+
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //       builder: (context) => const UserSide()),
+                          // );
+                        }
+                      : null,
                   child: Text(
-                      'Submit')),
-              ElevatedButton(
-                  onPressed: gotPosition ? () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const Emergency()));
-                  
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const UserSide()),
-                    // );
-                  } : null,
-                  child: Text(
-                      'Go emergency')) //can be made to disappear when skip is pressed?
+                      'Send Emergency')) //can be made to disappear when skip is pressed?
             ],
           ),
         ),
         SlidingUpPanel(
-          minHeight: 100,
+          controller: panelController,
+          isDraggable: true,
+          borderRadius: BorderRadius.all(
+            Radius.circular(16.0),
+          ),
+          minHeight: 160,
           maxHeight: 300,
-          panel: Column(children: [
-            Text("Name: ${theUser.name}"),
-            Text("Phone: ${theUser.phone}"),
-            Text("Email: ${theUser.email}"),
-            Text("Date of Birth: ${theUser.dateOfBirth}"),
-            Text("Blood Group: ${theUser.blood}"),
-            Text("Address: ${theUser.address}"),
-            Text("Document Type/ID: ${theUser.docType}/${theUser.docID}"),
-          ]),
-          collapsed: Container(
-            decoration: BoxDecoration(
-                color: Color(0xffeaeaeb)),
-            child: Row(
+          panel: ListTile(
+            title: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          theUser.name!,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        theUser.phone!,
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                      ElevatedButton(onPressed: 
-                      () async {
-                        AuthAPI authAPI = AuthAPI();
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        prefs.remove('token');
-                        prefs.remove('isLoggedIn');
-                        var res = await authAPI.logout(token);
-                        token = '';
-                        print(res.body);
-                        if (context.mounted) Navigator.pushNamedAndRemoveUntil(context, '/auth' , (route) => false);
-                      }, 
-                      child: Text("Logout"))
-                    ],
-                  ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person_2_outlined,
+                      size: 25,
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("${theUser.name}", style: TextStyle(fontSize: 22)),
+                  ],
                 ),
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: AssetImage('assets/sounds/IMG_0751.JPG'),
-                )
+                Row(
+                  children: [
+                    Icon(
+                      Icons.phone_android_outlined,
+                      size: 25,
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("${theUser.phone}", style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.email_outlined,
+                      size: 25,
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("${theUser.email}", style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_month_outlined,
+                      size: 25,
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("${theUser.dateOfBirth}",
+                        style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.bloodtype_outlined,
+                      size: 25,
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("${theUser.blood}", style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_city_outlined,
+                      size: 25,
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("${theUser.address}", style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.document_scanner_outlined,
+                      size: 25,
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("${theUser.docType}", style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          collapsed: Card(
+            color: Color(0xFF252A48),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                SizedBox(
+                  height: 15,
+                ),
+                ListTile(
+                  onTap: () {
+                    panelController.open();
+                  },
+                  contentPadding: EdgeInsets.only(left: 20),
+                  title: Text(
+                    "${theUser.name}",
+                    style: TextStyle(color: Colors.white, fontSize: 25),
+                  ),
+                  subtitle: Text("${theUser.phone}",
+                      style: TextStyle(color: Colors.white, fontSize: 17)),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                        onPressed: () async {
+                          AuthAPI authAPI = AuthAPI();
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.remove('token');
+                          prefs.remove('isLoggedIn');
+                          var res = await authAPI.logout(token);
+                          token = '';
+                          print(res.body);
+                          if (context.mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/auth', (route) => false);
+                          }
+                        },
+                        child: Text(
+                          "LOGOUT",
+                        )),
+                    const SizedBox(width: 10),
+                  ],
+                ),
               ],
             ),
           ),
