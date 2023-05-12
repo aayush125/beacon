@@ -52,9 +52,7 @@ async def responder_websocket(
               }
             })
             break
-        
         await manager.update_responder_pos(responder.id, lat, lng)
-      
       elif json["type"] == "emergency_resolve":
         await manager.responder_resolve_emergency(json["emergency_id"], responder)
   except WebSocketDisconnect:

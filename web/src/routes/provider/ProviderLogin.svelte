@@ -1,27 +1,30 @@
 <script>
-    import { replace } from "svelte-spa-router";
-    import ambulance from "@/assets/ambulance.svg";
-   
-    let disabled = false
-  
-    async function loginHandle(e) {
-      disabled = true
-  
-      // const formData = new FormData(e.currentTarget)
-      // const res = await fetch("/api/web/admin/login", {
-      //   method: "post",
-      //   body: formData,
-      // })
-      
-      const res = {ok: true}
-  
-      disabled = false
-  
-      if (res.ok) replace('/provider/dashboard')
-    }
-  </script>
-  <body>
+  import { replace } from "svelte-spa-router"
+  import ambulance from "@/assets/ambulance.svg"
 
+  let disabled = false
+
+  async function loginHandle(e) {
+    disabled = true
+
+    // TODO: Check login here, also check if already logged in, in this page
+    // TODO: Make ProviderDashboard just a component and not a routed page, for convinience
+
+    // const formData = new FormData(e.currentTarget)
+    // const res = await fetch("/api/web/admin/login", {
+    //   method: "post",
+    //   body: formData,
+    // })
+
+    const res = { ok: true }
+
+    disabled = false
+
+    if (res.ok) replace("/provider/dashboard")
+  }
+</script>
+
+<body>
   <main class="center-align middle-align">
     <article class="medium-width round">
       <h5 class="center-align">Provider</h5>
@@ -41,25 +44,13 @@
       </form>
     </article>
   </main>
-  <div  id = "img-position">
+  <div id="img-position">
     <!-- <img src= {ambulance} alt="Illustration of ambulance" /> -->
   </div>
+</body>
 
-  </body>
-  
-  <style>
-    main {
-      min-height: 100vh;
-    }
-    
-    body{
-        /* background-color: #f0cfd5; */
-    }
-    /* #img-position{
-      position: relative;
-      top: -20em;
-      right: -20em;
-    } */
-
-  </style>
-  
+<style>
+  main {
+    min-height: 100vh;
+  }
+</style>

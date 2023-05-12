@@ -24,9 +24,14 @@ async def provider_websocket(ws: WebSocket, provider: Annotated[Provider, Depend
 
   session = Session.object_session(provider)
 
-  # Send list of responders
+  # Send list of responders, and lat/lng of provider office
   await ws.send_json({
-    "responders": responders_with_availibility(provider)
+    "type": "initial",
+    "responders": responders_with_availibility(provider),
+    "location": {
+      "lat": provider.locationLat,
+      "lng": provider.locationLng,
+    },
   })
 
   current = ConnectedProvider(provider=provider, ws=ws)
@@ -46,4 +51,7 @@ async def provider_websocket(ws: WebSocket, provider: Annotated[Provider, Depend
       else:
         await manager.provider_accept_emergency(data["emergency_id"], data["responder_id"], provider.provider_type)
   except WebSocketDisconnect:
+    print("Disconnected?")
+    # TODO reject emergency on provider disconnect
+    # await manager.provider_reject_emergency(data["emergency_id"], provider.name, provider.provider_type)
     provider_connections.remove(current)

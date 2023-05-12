@@ -68,7 +68,7 @@
 
         <div class="field label border">
           <input name="password" type="text" required />
-          <label>Contact Email</label>
+          <label>Password</label>
         </div>
       </div>
     </div>

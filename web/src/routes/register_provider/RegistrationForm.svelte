@@ -1,7 +1,7 @@
 <script>
   import beaconLogo from "@/assets/beacon_logo_backdrop.svg"
   import DocumentInput from "@/lib/DocumentInput.svelte"
-  import EmbedMap from "@/lib/EmbedMap.svelte";
+  import LocationInput from "@/lib/LocationInput.svelte";
 
   let formData
   let disabled = false
@@ -145,7 +145,7 @@
         </div>
         <div class="page padding left" id="loc">
           <p class="center-align">Click on the map to place the marker. Drag the map to move it.</p>
-          <EmbedMap />
+          <LocationInput />
           <label class="center checkbox">
             <input type="checkbox" required>
             <span>I have correctly set the location of our office above.</span>

@@ -6,6 +6,8 @@ from geopy.distance import geodesic as distance
 from db import Emergency, EmergencyType, Provider, User, EmergencyStatus, ResponderEmergencyLink, Responder
 from routes.web.provider.websocket import provider_connections
 from routes.responder_app.endpoints import responder_connections, ConnectedResponder
+from utils.age import calculate_age
+from utils.websocket import is_connected
 
 class TypedEmergency:
   def __init__(
@@ -44,6 +46,8 @@ class TypedEmergency:
     closest_km = 250000 # TODO change this to 250 or sth
 
     user_pos = lat, lng
+
+    print("provider connections: ", provider_connections)
 
     for connection in provider_connections:
       if (connection.provider.provider_type != self.type):
@@ -112,6 +116,8 @@ class ServerEmergency:
         })
         continue
       
+      age = calculate_age(self.user.dateOfBirth)
+      
       # If provider was found, provide emergency info to the provider so they can accept or reject
       await provider_ws.send_json({
         "type": "emergency",
@@ -120,6 +126,8 @@ class ServerEmergency:
           "user": {
             "name": self.user.name,
             "phone": self.user.phone,
+            "blood": self.user.blood,
+            "age": age,
           },
           "lat": self.emergency.locationLat,
           "lng": self.emergency.locationLng,
@@ -137,42 +145,48 @@ class ServerEmergency:
   
   async def handle_resolve_responder(self, responder: Responder):
     for e in self.typed_emergencies.values():
+      if e.responder_connection is None:
+        continue
+      
       if e.responder_connection.responder.id == responder.id:
         await self.user_ws.send_json({
           "type": "responder_update",
           "state": "resolved",
           "responder_id": responder.id,
-          "type": responder.provider.provider_type
         })
 
-        await e.provider_connection.send_json({
-          "type": "emergency_update",
-            "emergency": {
-              "id": self.emergency.id,
-              "status": EmergencyStatus.RESOLVED
-            }
-        })
+        if (is_connected(e.provider_connection)):
+          await e.provider_connection.send_json({
+            "type": "emergency_update",
+              "emergency": {
+                "id": self.emergency.id,
+                "status": EmergencyStatus.RESOLVED
+              }
+          })
 
         await e.resolve()
 
   async def handle_reject_responder(self, responder: Responder):
     for e in self.typed_emergencies.values():
+      if e.responder_connection is None:
+        continue
+      
       if e.responder_connection.responder.id == responder.id:
         
         await self.user_ws.send_json({
           "type": "responder_update",
           "state": "rejected",
           "responder_id": responder.id,
-          "type": responder.provider.provider_type
         })
 
-        await e.provider_connection.send_json({
-          "type": "emergency_update",
-            "emergency": {
-              "id": self.emergency.id,
-              "status": EmergencyStatus.REJECTED
-            }
-        })
+        if (is_connected(e.provider_connection)):
+          await e.provider_connection.send_json({
+            "type": "emergency_update",
+              "emergency": {
+                "id": self.emergency.id,
+                "status": EmergencyStatus.REJECTED
+              }
+          })
         
         await e.reject()
 
@@ -185,6 +199,9 @@ class ServerEmergency:
   
   async def update_responder_pos(self, responder_id: int, lat: float, lng: float):
     for e in self.typed_emergencies.values():
+      if e.responder_connection is None:
+        continue
+
       if e.responder_connection.responder.id == responder_id:
         await self.user_ws.send_json({
           "type": "responder_pos",
@@ -227,7 +244,8 @@ class ServerEmergency:
           "responder": {
             "id": c.responder.id,
             "name": c.responder.name,
-            "phone": c.responder.phone
+            "phone": c.responder.phone,
+            "type": e_type,
           }
         })
 
@@ -239,7 +257,7 @@ class ServerEmergency:
     for c in self.typed_emergencies.values():
       
       if c.provider_connection is not None:
-        if c.provider_connection.application_state == WebSocketState.CONNECTED:
+        if is_connected():
           await c.provider_connection.send_json({
             "type": "emergency_update",
             "emergency": {
