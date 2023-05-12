@@ -23,7 +23,7 @@
   </p>
 
   <RouteButton route="/register_provider">Provider Registration</RouteButton>
-  <RouteButton route="/provider/login">Provider Dashboard</RouteButton>
+  <RouteButton route="/provider">Provider Dashboard</RouteButton>
   <RouteButton route="/admin/login">Admin Dashboard</RouteButton>
 
 </div>

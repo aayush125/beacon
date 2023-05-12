@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import 'auth.dart';
 import 'user.dart';
@@ -13,6 +15,9 @@ import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +36,101 @@ Future<void> main() async {
 var serverAddress = '';
 var token = '';
 User theUser = User();
-late Position position;
+late LatLng position;
 bool gotPosition = false;
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+var posForSink;
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  // handle action
+  print("this run");
+}
+
+void _initForegroundTask() {
+  FlutterForegroundTask.init(
+    androidNotificationOptions: AndroidNotificationOptions(
+      channelId: 'notification_channel_id',
+      channelName: 'Foreground Notification',
+      channelDescription:
+          'This notification appears when the foreground service is running.',
+      channelImportance: NotificationChannelImportance.MIN,
+      priority: NotificationPriority.LOW,
+      isSticky: false,
+      iconData: null,
+    ),
+    iosNotificationOptions: const IOSNotificationOptions(
+      showNotification: true,
+      playSound: false,
+    ),
+    foregroundTaskOptions: const ForegroundTaskOptions(
+      interval: 10000,
+      isOnceEvent: false,
+      autoRunOnBoot: false,
+      allowWakeLock: true,
+      allowWifiLock: true,
+    ),
+  );
+}
+
+// The callback function should always be a top-level function.
+@pragma('vm:entry-point')
+void startCallback() {
+  // The setTaskHandler function must be called to handle the task in the background.
+  FlutterForegroundTask.setTaskHandler(BackgroundTaskHandler());
+}
+
+class BackgroundTaskHandler extends TaskHandler {
+  late WebSocketChannel _channel;
+
+  @override
+  Future<void> onStart(DateTime timestamp, SendPort? sendPort) async {
+    // You can use the getData function to get the stored data.
+
+    final url =
+        await FlutterForegroundTask.getData<String>(key: 'websocket_endpoint');
+
+    print('WebSocket URL: $url');
+
+    _channel = WebSocketChannel.connect(Uri.parse(url!));
+
+    _channel.stream.listen((msg) async {
+      // sendPort?.send();
+      // await FlutterForegroundTask.saveData(key: 'emergency', value: msg.toString());
+
+      final data = jsonDecode(msg);
+
+      await flutterLocalNotificationsPlugin.show(
+          0,
+          'Assigned to Emergency',
+          '${data['user']['name']} needs rescuing!',
+          const NotificationDetails(
+              android: AndroidNotificationDetails(
+                  'job_notification', 'Job Notification')),
+          payload: msg.toString());
+    });
+  }
+
+  @override
+  Future<void> onEvent(DateTime timestamp, SendPort? sendPort) async {
+    final posx = await _determinePosition();
+
+    print("event this is");
+
+    final msg = jsonEncode(
+        {'type': "pos_update", 'lat': posx.latitude, 'lng': posx.longitude});
+
+    _channel.sink.add(msg);
+  }
+
+  @override
+  Future<void> onDestroy(DateTime timestamp, SendPort? sendPort) async {
+    // You can use the clearAllData function to clear all the stored data.
+    await FlutterForegroundTask.clearAllData();
+    await _channel.sink.close();
+  }
+}
 
 class MyApp extends StatelessWidget {
   final bool status;
@@ -111,7 +209,8 @@ class _AddDialogState extends State<AddDialog> {
             ElevatedButton(
                 onPressed: () async {
                   serverAddress = dialogFieldController.text;
-                  position = await _determinePosition();
+                  final p = await _determinePosition();
+                  position = LatLng(p.latitude, p.longitude);
                   gotPosition = true;
                   if (token != '') {
                     AuthAPI authAPI = AuthAPI();
@@ -161,6 +260,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late GoogleMapController mapController;
+  dynamic _currentEmergency;
+
+  static const _initMarker =
+      Marker(markerId: MarkerId('emergency'), visible: false);
+  final _initCamPos = CameraPosition(
+    target: position,
+    zoom: 16.0,
+  );
+
+  Marker _marker = _initMarker;
 
   //final LatLng _center = const LatLng(27.688415, 85.335490);
 
@@ -168,47 +277,130 @@ class _MyHomePageState extends State<MyHomePage> {
     mapController = controller;
   }
 
+  Future<bool> _startForegroundTask() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onDidReceiveNotificationResponse:
+            (NotificationResponse notificationResponse) async {
+      final str = notificationResponse.payload;
+
+      final data = jsonDecode(str!);
+
+      setState(() {
+        _currentEmergency = data;
+        final pos = LatLng(data["lat"], data["lng"]);
+
+        _marker = Marker(markerId: const MarkerId('emergency'), position: pos);
+
+        mapController.animateCamera(CameraUpdate.newLatLng(pos));
+      });
+    });
+
+    if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+    }
+
+    print("gets here for sureeeeeee");
+
+    // You can save data using the saveData function.
+    await FlutterForegroundTask.saveData(
+        key: 'websocket_endpoint',
+        value: 'ws://$serverAddress/api/responder/ws?token=$token');
+
+    if (await FlutterForegroundTask.isRunningService) {
+      return FlutterForegroundTask.restartService();
+    } else {
+      print('starting');
+      return FlutterForegroundTask.startService(
+        notificationTitle: 'Foreground Service is running',
+        notificationText: 'Responder Status: Active',
+        callback: startCallback,
+      );
+    }
+  }
+
+  Future<bool> _stopForegroundTask() {
+    return FlutterForegroundTask.stopService();
+  }
+
+  void _startTask() async {
+    await _startForegroundTask();
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestPermission();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _initForegroundTask();
+    _startTask();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WithForegroundTask(
+        child: Scaffold(
       appBar: AppBar(
         title: Text("Emergency"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          if (_currentEmergency != null)
+            Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Column(children: [
+                  Text(
+                      'Name: ${_currentEmergency["user"]["name"]}\nPhone: ${_currentEmergency["user"]["phone"]}'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () async {
+                          UrlLauncher.launchUrl(Uri.parse(
+                              "tel://${_currentEmergency["user"]["phone"]}"));
+                        },
+                        child: const Text("Call User"),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final url = Uri.parse(
+                              'http://$serverAddress/api/responder/resolve_emergency?token=$token&emergency_id=${_currentEmergency["id"]}');
+
+                          setState(() {
+                            _currentEmergency = null;
+                            _marker = _initMarker;
+                          });
+
+                          await http.get(url);
+                        },
+                        child: const Text("Resolve Emergency"),
+                      ),
+                    ],
+                  )
+                ])),
           Expanded(
-              child: SizedBox(
-            height: 200.0,
-            child: GoogleMap(
-              onMapCreated: _onMapCreated,
-              markers: {
-                Marker(
-                  markerId: MarkerId('marker_1'),
-                  position: LatLng(position.latitude.toDouble(),
-                      position.longitude.toDouble()),
-                  draggable: true,
-                  onDragEnd: (value) {},
-                  infoWindow: InfoWindow(
-                    title: 'Marker 1',
-                    snippet: 'This is a snippet',
-                    onTap: () {
-                      UrlLauncher.launchUrl(Uri.parse("tel://911"));
-                    },
-                  ),
-                ),
-              },
-              myLocationEnabled: true,
-              initialCameraPosition: CameraPosition(
-                target: LatLng(position.latitude.toDouble(),
-                    position.longitude.toDouble()),
-                zoom: 16.0,
+            child: SizedBox(
+              height: 200.0,
+              child: GoogleMap(
+                onMapCreated: _onMapCreated,
+                markers: {_marker},
+                myLocationEnabled: true,
+                initialCameraPosition: _initCamPos,
               ),
             ),
-          ))
+          ),
         ],
       ),
-    );
+    ));
   }
 }
 
