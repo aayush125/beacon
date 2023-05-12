@@ -98,12 +98,9 @@ async def responder_websocket(
   
 #   return emergency.get_summary()
 
-# @router.post("/resolve_emergency")
-# async def responder_resolve(
-#   responder: Annotated[Responder, Depends(get_responder)]
-# ):
-#   emergency = manager.get_emergency_from_responder(responder)
-#   if emergency is None:
-#     return
-  
-#   await manager.resolve_emergency(emergency)
+@router.get("/resolve_emergency")
+async def responder_resolve(
+  emergency_id: int,
+  responder: Annotated[Responder, Depends(get_responder_query)]
+):
+  await manager.responder_resolve_emergency(emergency_id, responder)

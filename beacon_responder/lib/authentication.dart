@@ -93,6 +93,7 @@ class _LoginPageState extends State<LoginPage> {
               var req = await _authAPI.login(
                   phoneController.text, passController.text);
               print(req);
+              print("status code: $req.statusCode");
               if (context.mounted) {
                 if (req.statusCode == 200) {
                   var user = User.fromReqBody(req.body);

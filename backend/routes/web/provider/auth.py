@@ -85,6 +85,11 @@ def login_provider(username: FormStr, password: FormStr):
   return res
 
 
+@router.get("/is_logged_in")
+def is_logged_in(provider = Depends(get_provider)):
+  return
+
+
 @router.post("/logout")
 def logout_provider(provider: Annotated[Provider, Depends(get_provider)]):
   session = Session.object_session(provider)

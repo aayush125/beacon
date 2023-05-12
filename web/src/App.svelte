@@ -4,9 +4,7 @@
   import NotFound from "./routes/NotFound.svelte";
   import RegistrationForm from "./routes/register_provider/RegistrationForm.svelte";
   import AdminRouter from "./routes/admin/AdminRouter.svelte";
-    import ProviderLogin from "./routes/provider/ProviderLogin.svelte";
-    import ProviderDashboard from "./routes/provider/dashboard/ProviderDashboard.svelte";
-    import ResponderRegistration from "./routes/register_responder/ResponderRegistration.svelte";
+  import ProviderLogin from "./routes/provider/ProviderLogin.svelte";
 
   const routes = {
     "/": Homepage,
@@ -15,8 +13,6 @@
     "/admin": AdminRouter,
     "/admin/*": AdminRouter,
     "/provider": ProviderLogin,
-    "/provider/dashboard": ProviderDashboard,
-    "/register_responder": ResponderRegistration,
     "*": NotFound,
   }
 </script>

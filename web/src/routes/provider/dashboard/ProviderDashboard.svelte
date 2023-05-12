@@ -1,10 +1,11 @@
 <script>
   import responder_placeholder from "@/assets/responder_placeholder.svg";
   import beaconLogo from "@/assets/beacon_logo_backdrop.svg";
-  import RouteButton from "@/lib/RouteButton.svelte";
   import { onDestroy } from "svelte";
   import { fly } from "svelte/transition";
   import EmbedMap from "@/lib/EmbedMap.svelte";
+  import { replace } from "svelte-spa-router";
+  import ResponderRegistration from "./ResponderRegistration.svelte";
 
   /** @type WebSocket | null */
   let ws = null;
@@ -19,13 +20,21 @@
   let loading = true;
   let map;
 
-  // TODO 1: Add logout button somewhere
-  // TODO 2: (less important) change how selected items work, use references instead of ID, and add functions to remove
-  //          instead of doing it all manually
 
   onDestroy(() => {
     ws?.close();
   });
+
+  let toastText;
+  let toastColor;
+  function triggerToast(text, color) {
+    toastText = text
+    toastColor = color
+
+    setTimeout(() => {
+      ui("#emergency-toast")
+    }, 0);
+  }
 
   function refreshMarkers() {
     responders.forEach((e) => {
@@ -79,8 +88,6 @@
       }
 
       if (data.type === "emergency") {
-        data.emergency.sent = false;
-
         data.emergency.marker = new google.maps.Marker({
           position: { lat: data.emergency.lat, lng: data.emergency.lng },
           map,
@@ -99,7 +106,6 @@
 
       if (data.type === "responder_pos_update") {
         // {"id": 6, "lat": 1.231, "lng": 2.321, "available": true}
-
         const target = responders.findIndex((e) => e.id === data.responder.id);
         if (target !== -1) {
           console.log(responders);
@@ -121,24 +127,31 @@
 
       // Usually used when emergencies end
       if (data.type === "emergency_update") {
-        // TODO decide what to do with resolved emergencies
+        const target = emergencies.find((e) => e.id === data.emergency.id)
+        if (!target) return;
+        
+        target.marker.setMap(null)  
 
         if (data.emergency.status === "rejected") {
-          if (selectedEmergencyId === data.emergency.id) {
-            selectedEmergencyId = null;
-            const target = emergencies.find((e) => e.id === selectedEmergencyId)
-            if (target) {
-              target.marker.setMap(null)
-            }
-          }
-
-          emergencies = emergencies.filter((r) => r.id !== data.emergency.id);
+          triggerToast(`${target.user.name}'s emergency was cancelled`, 'red')
         }
+        else {
+          triggerToast(`${target.user.name}'s emergency was resolved`, 'green')
+        }
+
+        emergencies = emergencies.filter((r) => r.id !== data.emergency.id);
+        if (selectedEmergencyId === data.emergency.id) selectedEmergencyId = null;
+        
         return;
       }
     };
   }
 </script>
+
+<div id="emergency-toast" class="toast {toastColor} white-text top">
+  <i>info</i>
+  <span>{toastText}</span>
+</div>
 
 <div class="modal" id="reject-dialog">
   <h4>Confirm Rejection</h4>
@@ -157,6 +170,8 @@
           })
         );
 
+        emergencies.find((e) => e.id === selectedEmergencyId)?.marker.setMap(null)
+
         // Update emergencies list
         emergencies = emergencies.filter((e) => e.id !== rejectionId);
 
@@ -172,13 +187,15 @@
   </nav>
 </div>
 
+<ResponderRegistration/>
+
 <nav class="sidebar left elevate">
   <a href="#/">
     <img class="circle" src={beaconLogo} />
   </a>
   <h5 class="padding">Responders List</h5>
 
-  <RouteButton route="/register_responder">Register New Responders</RouteButton>
+  <button class="small-elevate medium-margin" data-ui="#registration-form">Register New Responders</button>
 
   {#each responders as responder}
     <article
@@ -189,7 +206,7 @@
       <div class="row">
         <img class="right-round medium" src={responder_placeholder} />
         <div class="max">
-          <h5>{responder.name}</h5>
+          <p class="large-text bold">{responder.name}</p>
           <span>{responder.phone}</span>
         </div>
         <button
@@ -211,6 +228,12 @@
 </nav>
 
 <nav class="sidebar right elevate">
+  <button class="border circle" on:click={async () => {
+    await fetch('/api/web/provider/logout', { method: 'post' })
+    replace('/')
+  }}>
+    <i>Logout</i>
+  </button>
   <h5 class="padding">Emergencies</h5>
   {#each emergencies as emergency}
     <article

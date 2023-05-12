@@ -257,7 +257,7 @@ class ServerEmergency:
     for c in self.typed_emergencies.values():
       
       if c.provider_connection is not None:
-        if is_connected():
+        if is_connected(c.provider_connection):
           await c.provider_connection.send_json({
             "type": "emergency_update",
             "emergency": {

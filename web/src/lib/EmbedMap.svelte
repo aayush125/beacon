@@ -24,6 +24,14 @@
     const map = new Map(container, {
       zoom,
       center: { lat, lng },
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.TOP_RIGHT,
+      },
+      mapTypeControlOptions: {
+        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+      }
     });
 
     dispatch("load", map);
